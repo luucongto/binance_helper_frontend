@@ -78,28 +78,20 @@ class Login extends Component {
                       <Input type='password' placeholder='Password' onChange={event => this.setState({password: event.target.value})} value={this.state.password} />
                     </InputGroup>
                     <Row>
-                      <Col xs='6'>
-                        <Button color='primary' className='px-4' onClick={() => this._login()}>Login</Button>
+                      <Col xs='6' lg='6'>
+                        <Button color='primary' className='px-4 loginBtn' onClick={() => this._login()}>Login</Button>
                       </Col>
-                      <Col xs='6' className='text-right'>
-                        {/* <Button color='link' className='px-0'>Forgot password?</Button> */}
+                      <Col xs='6' lg='6'>
+                        <GoogleLogin
+                          className='loginBtn loginBtn--google'
+                          clientId={env.REACT_APP_GOOGLE_CLIENT_ID}
+                          onSuccess={this.googleResponse}
+                          onFailure={this.googleResponse}
+                      >
+                          <strong> Login With Google </strong>
+                        </GoogleLogin>
                       </Col>
                     </Row>
-
-                  </CardBody>
-                </Card>
-                <Card className='py-5 d-md-down-none' style={{ width: 44 + '%' }}>
-                  <CardBody className='text-center'>
-                    <h1>Or</h1>
-                    <p className='text-muted'>Sign In to your account</p>
-                    <GoogleLogin
-                      className='loginBtn loginBtn--google'
-                      clientId={env.REACT_APP_GOOGLE_CLIENT_ID}
-                      onSuccess={this.googleResponse}
-                      onFailure={this.googleResponse}
-                      >
-                      <strong> Login With Google </strong>
-                    </GoogleLogin>
                   </CardBody>
                 </Card>
               </CardGroup>
