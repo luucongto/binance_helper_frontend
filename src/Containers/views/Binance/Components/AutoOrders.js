@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { Badge, Button, Card, CardBody, CardHeader, Col, Row, Table, Collapse } from 'reactstrap'
+import { Badge, Button, Card, CardBody, CardHeader, Col, Row, Table, Collapse, FormGroup, Input, Label } from 'reactstrap'
 import { connect } from 'react-redux'
 import AutoOrdersActions from '../../../../Redux/AutoOrdersRedux'
 import SocketApi from '../../../../Services/SocketApi'
@@ -14,7 +14,9 @@ class AutoOrders extends Component {
     super(props)
     this.state = {
       orders: [],
-      showOrder: false
+      showOrder: false,
+      showTest: false,
+      showCancel: false
     }
     this._setupSocket()
   }
@@ -140,6 +142,12 @@ class AutoOrders extends Component {
 
   render () {
     let orders = this.state.orders
+    if (!this.state.showTest) {
+      orders = orders.filter(order => order.type !== 'TEST')
+    }
+    if (!this.state.showCancel) {
+      orders = orders.filter(order => order.status !== 'cancel')
+    }
     return (
       <div className='animated fadeIn'>
         <Row>
@@ -147,6 +155,20 @@ class AutoOrders extends Component {
             <Card>
               <CardHeader>
                 <i className='fa fa-align-justify' /> Auto Order
+                <FormGroup check inline>
+                  <Badge color='success' className='pt-1 pb-1 ml-1'>
+                    <Input className='form-check-input' type='checkbox' id='inline-radio1' name='showTest' checked={this.state.showTest} onChange={(event) => {
+                      this.setState({showTest: event.target.checked})
+                    }} />
+                    <Label className='form-check-label' check htmlFor='inline-radio1'>Test</Label>
+                  </Badge>
+                </FormGroup>
+                <FormGroup check inline>
+                  <Badge color='danger' className='pt-1 pb-1 ml-1'>
+                    <Input className='form-check-input' type='checkbox' id='inline-radio3' name='showCancel' checked={this.state.showCancel} onChange={(event) => this.setState({showCancel: event.target.checked})} />
+                    <Label className='form-check-label' check htmlFor='inline-radio3'>Cancel</Label>
+                  </Badge>
+                </FormGroup>
                 <a className=' float-right mb-0 card-header-action btn btn-minimize' onClick={() => this.setState({showOrder: !this.state.showOrder})}><i className={this.state.showOrder ? 'icon-arrow-up' : 'icon-arrow-down'} /></a>
                 <a className=' float-right mb-0 card-header-action btn btn-minimize' onClick={() => this.refresh()}><i className='fa fa-refresh' /></a>
               </CardHeader>
