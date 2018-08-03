@@ -94,10 +94,8 @@ class OpenOrders extends Component {
     switch (element.status) {
       case 'watching':
         return (<Button color='warning' size='sm' className='ml-3' onClick={() => this.holdOrder(element.id)} active> <i className='fa fa-pause' /> </Button>)
-      case 'hold':
+      default :
         return (<Button color='success' size='sm' className='ml-3' onClick={() => this.resumeOrder(element.id)} active> <i className='fa fa-play' /> </Button>)
-      default:
-        return ''
     }
   }
   _color (status) {
