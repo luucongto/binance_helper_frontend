@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Badge, Button, Card, CardBody, CardHeader, InputGroup, InputGroupAddon, InputGroupText, Col, Row, Progress, FormGroup, Input } from 'reactstrap'
 import { connect } from 'react-redux'
-import Binance from 'binance-api-node'
+import Custom from 'binance-api-node'
 import underscore from 'underscore'
 import LivePriceActions from '../../../../Redux/LivePriceRedux'
 
@@ -18,7 +18,7 @@ class LivePrice extends Component {
       currency: 'USDT',
       asset: this.assets('USDT')[0]
     }
-    this.binance = new Binance()
+    this.binance = new Custom()
     this.assets = this.assets.bind(this)
   }
   assets (currency) {

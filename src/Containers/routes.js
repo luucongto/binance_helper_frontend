@@ -174,15 +174,15 @@ const Widgets = Loadable({
 
 //Custom
 const AccountInfo = Loadable({
-  loader: () => import ('./views/Binance/AccountInfo'),
+  loader: () => import ('./views/Custom/AccountInfo'),
   loading: Loading,
 })
 const OpenOrders = Loadable({
-  loader: () => import ('./views/Binance/Components/OpenOrders'),
+  loader: () => import ('./views/Custom/Components/OpenOrders'),
   loading: Loading,
 })
 const Trade = Loadable({
-  loader: () => import ('./views/Binance/Trade'),
+  loader: () => import ('./views/Custom/Trade'),
   loading: Loading,
 })
 

@@ -1,23 +1,31 @@
 import React, { Component } from 'react'
-import { Badge, Button, Card, CardBody, CardHeader, Col, Row, Table, Collapse } from 'reactstrap'
+import {Button, Card, CardHeader, Col, Row} from 'reactstrap'
 import { connect } from 'react-redux'
 import OpenOrdersActions from '../../../../Redux/OpenOrdersRedux'
-import moment from 'moment'
-import {AppSwitch} from '@coreui/react'
 import SocketApi from '../../../../Services/SocketApi'
 import Utils from '../../../../Utils/Utils'
-import ConfirmButton from './ConfirmButton'
+import InfiniteScrollList from './InfiniteScrollList'
+import OpenOrderRow from './OpenOrderRow'
 import underscore from 'underscore'
 class OpenOrders extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      showDoneOrder: false,
-      showOrder: true,
       showAuto: true,
-      showTest: false,
-      openOrders: [],
-      doneOrders: []
+      openingOrder: -1,
+      filters: {
+        'done': false,
+        'watching': true,
+        'waiting': true,
+        'cancel': false,
+        'manual': true,
+        'auto': true,
+        'buy': true,
+        'sell': true,
+        'TEST': false,
+        'REAL': true
+      },
+      hideSymbols: []
     }
     this._setupSocket()
   }
@@ -101,158 +109,136 @@ class OpenOrders extends Component {
   _color (status) {
     switch (status) {
       case 'watching':
+      case 'buy':
+      case 'TEST':
         return 'success'
       case 'cancel':
+      case 'REAL':
+      case 'sell':
         return 'danger'
       case 'waiting':
         return 'warning'
       case 'done':
         return 'info'
+      case 'manual':
+        return 'secondary'
+      case 'auto':
+        return 'primary'
+
       default:
         return 'light'
     }
   }
-  _renderTable (orders) {
-    let ordersTotal = 0
-    let ordersExpectTotal = 0
-    orders.forEach(element => {
-      let total = element.quantity * element.price
-      let expectTotal = element.quantity * element.expect_price
-      element.percent = Utils.formatNumber(total / expectTotal * 100 - 100)
-      element.total = Utils.formatNumber(total)
-      element.expectTotal = Utils.formatNumber(expectTotal)
-      ordersTotal += total
-      ordersExpectTotal += expectTotal
-      element.offset_percent = Utils.formatNumber(element.offset / element.expect_price * 100)
-    })
-    ordersTotal = Utils.formatNumber(ordersTotal)
-    ordersExpectTotal = Utils.formatNumber(ordersExpectTotal)
-    return !orders.length ? ('') : (
-      <Table responsive size='sm'>
-        <thead>
-          <tr>
-            {/* <th> id </th> */}
-            <th> pair </th>
-            <th>
-              <Badge color={'light'}> Price </Badge>
-              <Badge color={'dark'}> Expect </Badge>
-              <Badge color={'info'}> Offset </Badge>
-            </th>
-            <th>
-              <Badge color={'info'}> Estimate </Badge>
-              <Badge color={'light'}> {ordersTotal} </Badge>
-              <Badge color={'dark'}> {ordersExpectTotal} </Badge> </th>
-            <th> mode
 
-            </th>
-            {/* <th> createdAt </th> */}
-            <th> status </th>
+  _fetchMoreData (currentOrders, init = false) {
+    let orders = Object.values(this.props.openOrders) || []
+    currentOrders = init ? [] : currentOrders
+    let renderOrders = orders
+    if (!this.state.filters.done) {
+      renderOrders = renderOrders.filter(order => order.status !== 'done')
+    }
+    if (!this.state.filters.watching) {
+      renderOrders = renderOrders.filter(order => order.status !== 'watching')
+    }
+    if (!this.state.filters.waiting) {
+      renderOrders = renderOrders.filter(order => order.status !== 'waiting')
+    }
+    if (!this.state.filters.cancel) {
+      renderOrders = renderOrders.filter(order => order.status !== 'cancel')
+    }
+    if (!this.state.filters.manual) {
+      renderOrders = renderOrders.filter(order => order.balance_id > 0)
+    }
+    if (!this.state.filters.auto) {
+      renderOrders = renderOrders.filter(order => order.balance_id === 0)
+    }
+    if (!this.state.filters.buy) {
+      renderOrders = renderOrders.filter(order => order.mode !== 'buy')
+    }
+    if (!this.state.filters.sell) {
+      renderOrders = renderOrders.filter(order => order.mode !== 'sell')
+    }
+    if (!this.state.filters.TEST) {
+      renderOrders = renderOrders.filter(order => order.type !== 'TEST')
+    }
+    if (!this.state.filters.REAL) {
+      renderOrders = renderOrders.filter(order => order.type !== 'REAL')
+    }
+    if (this.state.hideSymbols.length > 0) {
+      this.state.hideSymbols.forEach(symbol => {
+        renderOrders = renderOrders.filter(order => order.asset !== symbol && order.currency !== symbol)
+      })
+    }
+    
+    let filteredLists = renderOrders.slice(currentOrders.length, currentOrders.length + 20)
+    let newOrders = [...currentOrders, ...filteredLists]
+    newOrders = underscore.uniq(newOrders)
+    newOrders = underscore.sortBy(newOrders, order => -new Date(order.updatedAt).getTime())
+    return {items: newOrders, hasMore: newOrders.length < renderOrders.length}
+  }
+  toggle (index) {
+    if (this.state.openingOrder === index) {
+      this.setState({openingOrder: -1})
+    } else {
+      this.setState({openingOrder: index})
+    }
+  }
+  _renderList () {
+    return (
+      <InfiniteScrollList ref='scrollList'
+        items={Object.values(this.props.openOrders) || []}
+        renderItem={(order, index) => <OpenOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => this.toggle(order.id)} />}
+        fetchData={(currentOrders, init) => this._fetchMoreData(currentOrders, init)}
+        />
+    )
+  }
+  _renderHeader (openOrders) {
+    let self = this
+    let symbols = openOrders.map(order => order.asset).concat(openOrders.map(order => order.currency))
+    symbols = underscore.uniq(symbols)
 
-          </tr>
-        </thead>
-        <tbody>
-          {
-            orders.map((element, index) => {
-              return (
-                <tr key={index} >
-                  {/* <td> {element.id} </td> */}
-                  <td>
-                    <Badge color={'info'}> {Utils.formatNumber(element.quantity)} </Badge>
-                    <Badge color={'light'}> {element.asset} </Badge>
-                    <Badge color={'dark'}> {element.currency} </Badge>
-                  </td>
-                  <td>
-                    <Badge color={'light'}> {Utils.formatNumber(element.price)} </Badge>
-                    <Badge color={'dark'}> {Utils.formatNumber(element.expect_price)} </Badge>
-                    <Badge color={'info'}> {Utils.formatNumber(element.offset)} </Badge>
-                    <Badge color={'success'}> {Utils.formatNumber(element.offset_percent)}% </Badge>
-                  </td>
-                  <td>
-                    <Badge color={'light'}> { Utils.formatNumber(element.total)} </Badge>
-                    <Badge color={'dark'}> { Utils.formatNumber(element.expectTotal)} </Badge>
-                    <Badge color={(element.mode === 'buy' && element.percent <= 0) || (element.mode === 'sell' && element.percent >= 0) ? 'success' : 'danger'}> {element.percent}% </Badge>
-                  </td>
-                  <td>
-                    <Badge color={element.mode === 'buy' ? 'success' : 'danger'}> {element.mode} </Badge>
-                    <Badge color={element.type === 'TEST' ? 'success' : 'danger'}> {element.type}</Badge>
-                    {element.binance_order_id ? (<Badge color={'dark'}> {element.binance_order_id}</Badge>) : ('')}
-                    <Badge color={element.balance_id > 0 ? 'primary' : 'secondary'}> {element.balance_id > 0 ? `Auto[${element.balance_id}]` : 'Manual'} </Badge>
-                  </td>
-
-                  <td>
-                    <Row>
-                      <Col lg='7'>
-                        <Badge color={'light'}> {moment(element.updatedAt).format('MM/DD HH:mm')} </Badge>
-                        <Badge className='ml-3' color={this._color(element.status)}> {element.status} </Badge>
-                      </Col>
-                      <Col>
-                        { this._getButton(element) }
-                        {
-                      element.status === 'done' || element.status === 'cancel' ? ('') : (
-                        <ConfirmButton color='danger' size='sm' className='ml-3' onClick={() => this.cancelOrder(element.id)} active> <i className='fa fa-stop' /> </ConfirmButton>
-                      )
-                    }
-                      </Col>
-                    </Row>
-                  </td>
-                </tr>
-              )
-            })
-          }
-        </tbody>
-      </Table>
+    return (
+      <Card>
+        <CardHeader>
+          {Object.keys(this.state.filters).map(filter => (
+            <Button key={filter} size='sm' className='mr-1 mt-1' color={this._color(filter)} onClick={() => {
+              let filters = JSON.parse(JSON.stringify(this.state.filters))
+              filters[filter] = !filters[filter]
+              self.setState({filters})
+            }} >
+              <i className={this.state.filters[filter] ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
+              {filter}
+            </Button>
+              ))}
+          {symbols.map(symbol => (
+            <Button key={symbol} size='sm' className='mr-1 mt-1' color={this._color(symbol)} onClick={() => {
+              let hideSymbols = Utils.clone(this.state.hideSymbols)
+              let index = hideSymbols.indexOf(symbol)
+              if (index < 0) hideSymbols.push(symbol)
+              else hideSymbols.splice(index, 1)
+              this.setState({hideSymbols})
+            }} >
+              <i className={this.state.hideSymbols.indexOf(symbol) < 0 ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
+              {symbol}
+            </Button>
+              ))}
+        </CardHeader>
+      </Card>
     )
   }
   render () {
-    let openOrders = Utils.clone(this.state.openOrders)
-    let doneOrders = Utils.clone(this.state.doneOrders)
-    let status = this._filterStatus(openOrders)
-    let doneStatus = this._filterStatus(doneOrders)
-    if (!this.state.showAuto) {
-      openOrders = openOrders.filter(order => !order.balance_id)
-      doneOrders = doneOrders.filter(order => !order.balance_id)
-    }
-    if (!this.state.showTest) {
-      openOrders = openOrders.filter(order => order.type !== 'TEST')
-      doneOrders = doneOrders.filter(order => order.type !== 'TEST')
-    }
     return (
       <div className='animated fadeIn pl-0 pr-0'>
         <Row>
           <Col>
-            <Card>
-              <CardHeader>
-                <i className='fa fa-align-justify' /> Orders
-                Connection:
-
-                <Badge className='ml-3' color='primary'> Auto {status.auto}</Badge>
-                <Badge className='ml-3' color='secondary'> Manual {status.manual}</Badge>
-                <Badge className='ml-3' color='success'> TEST {status.TEST} </Badge>
-
-                <Badge className='ml-3' color='danger'> REAL {status.REAL}</Badge>
-                <Badge className='ml-3' color='warning'> Waiting {status.waiting}</Badge>
-                <Badge className='ml-3' color='success'> Watching {status.watching}</Badge>
-                <Badge className='ml-3' color='success'> Buy {status.buy}</Badge>
-                <Badge className='ml-3' color='danger'> Sell {status.sell}</Badge>
-
-                <a className=' float-right mb-0 card-header-action btn btn-minimize' onClick={() => this.setState({showOrder: !this.state.showOrder})} ><i className={this.state.showOrder ? 'icon-arrow-up' : 'icon-arrow-down'} /></a>
-                <a className=' float-right mb-0 card-header-action btn btn-minimize' onClick={() => this.refresh()}><i className='fa fa-refresh' /></a>
-
-                <AppSwitch className={'ml-1 mr-3 mb-0 float-right '} label color={'success'} defaultChecked={this.state.showTest} size={'sm'} onClick={() => this.setState({showTest: !this.state.showTest})} />
-                <strong className='float-right'> Show Test </strong>
-                <AppSwitch className={'ml-1 mr-3  mb-0 float-right'} label color={'info'} defaultChecked={this.state.showAuto} size={'sm'} onClick={() => this.setState({showAuto: !this.state.showAuto})} />
-                <strong className='float-right'> Auto </strong>
-              </CardHeader>
-              <Collapse isOpen={this.state.showOrder} id='collapseExample'>
-                <CardBody className='pl-0 pr-0'>
-                  {this._renderTable(openOrders)}
-                </CardBody>
-              </Collapse>
-            </Card>
+            {this._renderHeader(this.props.openOrders)}
           </Col>
         </Row>
-
         <Row>
+          {this._renderList()}
+        </Row>
+
+        {/* <Row>
           <Col>
             <Card>
               <CardHeader>
@@ -275,7 +261,7 @@ class OpenOrders extends Component {
               </Collapse>
             </Card>
           </Col>
-        </Row>
+        </Row> */}
       </div>
 
     )

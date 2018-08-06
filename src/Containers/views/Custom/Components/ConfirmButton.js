@@ -14,11 +14,11 @@ class ConfirmButton extends Component {
       isConfirming: false
     }
   }
-  cancel(){
+  cancel () {
     this.setState({isConfirming: false})
   }
-  click(){
-    if(this.state.isConfirming){
+  click () {
+    if (this.state.isConfirming) {
       this.cancel()
       this.props.onClick()
     } else {
@@ -28,16 +28,16 @@ class ConfirmButton extends Component {
   }
 
   render () {
-    if(this.state.isConfirming) { 
+    if (this.state.isConfirming) {
       return (
-        <div className={this.props.className || ''}>
+        <a className='mb-0 card-header-action btn btn-minimize' >
           <Button size={this.props.size || 'sm'} active color='danger' onClick={() => this.cancel()}>
-            <i className='fa fa-ban'/>
+            <i className='fa fa-ban' />
           </Button>
           <Button className='ml-2' size={this.props.size || 'sm'} active color='success' onClick={() => this.click()}>
-            <i className='fa fa-check'/>
+            <i className='fa fa-check' />
           </Button>
-        </div>
+        </a>
       )
     } else {
       return (
@@ -48,6 +48,5 @@ class ConfirmButton extends Component {
     }
   }
 }
-
 
 export default ConfirmButton
