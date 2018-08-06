@@ -13,6 +13,7 @@ class OpenOrders extends Component {
     this.state = {
       showAuto: true,
       openingOrder: -1,
+      orders: [],
       filters: {
         'done': false,
         'watching': true,
@@ -65,39 +66,7 @@ class OpenOrders extends Component {
       id: orderId
     })
   }
-  componentWillReceiveProps (props) {
-    let openOrders = []
-    let doneOrders = []
-    if (props.openOrders) {
-      let orders = Utils.clone(props.openOrders)
-      openOrders = orders.filter(e => (e.status !== 'done' && e.status !== 'cancel'))
-      doneOrders = orders.filter(e => (e.status === 'done'))
-      openOrders = underscore.sortBy(openOrders, a => -new Date(a.updatedAt).getTime())
-      doneOrders = underscore.sortBy(doneOrders, a => -new Date(a.updatedAt).getTime())
-      this.setState({openOrders, doneOrders})
-    }
-  }
-  _filterStatus (openOrders) {
-    let status = {
-      'done': 0,
-      'watching': 0,
-      'waiting': 0,
-      'manual': 0,
-      'auto': 0,
-      'buy': 0,
-      'sell': 0,
-      'TEST': 0,
-      'REAL': 0
-    }
-    openOrders.forEach(order => {
-      status[order.status]++
-      if (order.balance_id) status.auto++
-      else status.manual ++
-      status[order.type]++
-      status[order.mode]++
-    })
-    return status
-  }
+
   _getButton (element) {
     switch (element.status) {
       case 'watching':
@@ -129,52 +98,52 @@ class OpenOrders extends Component {
         return 'light'
     }
   }
-
-  _fetchMoreData (currentOrders, init = false) {
-    let orders = Object.values(this.props.openOrders) || []
-    currentOrders = init ? [] : currentOrders
-    let renderOrders = orders
-    if (!this.state.filters.done) {
+  componentWillReceiveProps (props) {
+    let renderOrders = Object.values(props.openOrders) || []
+    this.setState({orders: this._filter(renderOrders)})
+  }
+  _filter (renderOrders, filters = this.state.filters, hideSymbols = this.state.hideSymbols) {
+    if (!renderOrders) {
+      console.error('filter order null')
+      return []
+    }
+    if (!filters.done) {
       renderOrders = renderOrders.filter(order => order.status !== 'done')
     }
-    if (!this.state.filters.watching) {
+    if (!filters.watching) {
       renderOrders = renderOrders.filter(order => order.status !== 'watching')
     }
-    if (!this.state.filters.waiting) {
+    if (!filters.waiting) {
       renderOrders = renderOrders.filter(order => order.status !== 'waiting')
     }
-    if (!this.state.filters.cancel) {
+    if (!filters.cancel) {
       renderOrders = renderOrders.filter(order => order.status !== 'cancel')
     }
-    if (!this.state.filters.manual) {
+    if (!filters.manual) {
       renderOrders = renderOrders.filter(order => order.balance_id > 0)
     }
-    if (!this.state.filters.auto) {
+    if (!filters.auto) {
       renderOrders = renderOrders.filter(order => order.balance_id === 0)
     }
-    if (!this.state.filters.buy) {
+    if (!filters.buy) {
       renderOrders = renderOrders.filter(order => order.mode !== 'buy')
     }
-    if (!this.state.filters.sell) {
+    if (!filters.sell) {
       renderOrders = renderOrders.filter(order => order.mode !== 'sell')
     }
-    if (!this.state.filters.TEST) {
+    if (!filters.TEST) {
       renderOrders = renderOrders.filter(order => order.type !== 'TEST')
     }
-    if (!this.state.filters.REAL) {
+    if (!filters.REAL) {
       renderOrders = renderOrders.filter(order => order.type !== 'REAL')
     }
-    if (this.state.hideSymbols.length > 0) {
-      this.state.hideSymbols.forEach(symbol => {
+    if (hideSymbols.length > 0) {
+      hideSymbols.forEach(symbol => {
         renderOrders = renderOrders.filter(order => order.asset !== symbol && order.currency !== symbol)
       })
     }
-    
-    let filteredLists = renderOrders.slice(currentOrders.length, currentOrders.length + 20)
-    let newOrders = [...currentOrders, ...filteredLists]
-    newOrders = underscore.uniq(newOrders)
-    newOrders = underscore.sortBy(newOrders, order => -new Date(order.updatedAt).getTime())
-    return {items: newOrders, hasMore: newOrders.length < renderOrders.length}
+    renderOrders = underscore.sortBy(renderOrders, order => -new Date(order.updatedAt).getTime())
+    return renderOrders
   }
   toggle (index) {
     if (this.state.openingOrder === index) {
@@ -186,9 +155,8 @@ class OpenOrders extends Component {
   _renderList () {
     return (
       <InfiniteScrollList ref='scrollList'
-        items={Object.values(this.props.openOrders) || []}
+        items={this.state.orders || []}
         renderItem={(order, index) => <OpenOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => this.toggle(order.id)} />}
-        fetchData={(currentOrders, init) => this._fetchMoreData(currentOrders, init)}
         />
     )
   }
@@ -204,7 +172,9 @@ class OpenOrders extends Component {
             <Button key={filter} size='sm' className='mr-1 mt-1' color={this._color(filter)} onClick={() => {
               let filters = JSON.parse(JSON.stringify(this.state.filters))
               filters[filter] = !filters[filter]
-              self.setState({filters})
+              let orders = Object.values(self.props.openOrders) || []
+              orders = self._filter(orders, filters)
+              self.setState({filters, orders})
             }} >
               <i className={this.state.filters[filter] ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
               {filter}
@@ -216,7 +186,9 @@ class OpenOrders extends Component {
               let index = hideSymbols.indexOf(symbol)
               if (index < 0) hideSymbols.push(symbol)
               else hideSymbols.splice(index, 1)
-              this.setState({hideSymbols})
+              let orders = Object.values(self.props.openOrders) || []
+              orders = self._filter(orders, this.state.filters, hideSymbols)
+              this.setState({hideSymbols, orders})
             }} >
               <i className={this.state.hideSymbols.indexOf(symbol) < 0 ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
               {symbol}

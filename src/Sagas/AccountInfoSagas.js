@@ -7,7 +7,6 @@ import LoginActions from '../Redux/LoginRedux'
 export function * accountInfo (api) {
   try {
     const res = yield call(api)
-    console.log('res', res)
     if (res.success) {
       yield put(AccountInfoActions.accountInfoSuccess(res.data))
     } else if (res.error) {

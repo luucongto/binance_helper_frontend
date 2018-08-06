@@ -24,6 +24,7 @@ class InfiniteScrollList extends Component {
   }
   componentWillReceiveProps (props) {
     if (props.items && Object.values(props.items).length) {
+      console.log('componentWillReceiveProps', props)
       this._fetchMoreData(true)
     }
   }
@@ -42,9 +43,9 @@ class InfiniteScrollList extends Component {
   _fetchMoreData (init = false) {
     if (this.state.fetchScroll) return
     this.setState({fetchScroll: true})
-    let self = this
     this.fetchTimeoutHandle = setTimeout(() => {
-      let {items, hasMore} = self.props.fetchData(this.state.items, init)
+      let items = this.props.items.slice(0, init ? 20 : this.state.items.length + 20)
+      let hasMore = (init ? 20 : this.state.items.length + 20) <= this.props.items.length
       this.setState({fetchScroll: false, items: items, hasMore: hasMore})
     }, 300)
   }
@@ -54,7 +55,6 @@ class InfiniteScrollList extends Component {
 }
 InfiniteScrollList.propTypes = {
   renderItem: PropTypes.func.isRequired,
-  fetchData: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired
 }
 export default InfiniteScrollList
