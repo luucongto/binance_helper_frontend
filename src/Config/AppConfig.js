@@ -1,5 +1,5 @@
 const AppConfig = {
-  appName: 'IgniteReactApp'
+  appName: 'Binance Helper'
 }
 
 export default AppConfig
