@@ -15,6 +15,7 @@ class OpenOrderRow extends Component {
       quantity: order.quantity || 0,
       type: order.type || 'NA',
       offset: order.offset || 0,
+      price: order.price || 0,
       expect_price: order.expect_price || 0,
       total: order.quantity * order.expect_price || 0
     }
@@ -26,6 +27,7 @@ class OpenOrderRow extends Component {
       quantity: order.quantity || 0,
       type: order.type || 'NA',
       offset: order.offset || 0,
+      price: order.price || 0,
       expect_price: order.expect_price || 0,
       total: order.quantity * order.expect_price || 0
     })
@@ -200,19 +202,11 @@ class OpenOrderRow extends Component {
             this.setState({expect_price: expectPrice, total})
           }} />), (<InputGroupText> {order.currency} </InputGroupText>))}
 
-          {this._renderInputItem('Total', (<Input type='number' id='name' placeholder='Enter total' required value={this.state.total} onChange={(event) => {
-            try {
-              let total = parseFloat(event.target.value)
-              if (this.state.expect_price > 0) {
-                let quantity = total / this.state.expect_price
-                this.setState({total, quantity})
-              } else {
-                let price = total / this.state.quantity
-                this.setState({total, price})
-              }
-            } catch (e) { console.log(e, event) }
+          {this._renderInputItem('Price', (<Input type='number' id='price' placeholder='0' required value={this.state.price} onChange={(event) => {
+            let price = parseFloat(event.target.value)
+            price = price > 0 ? price : 0
+            this.setState({price: price})
           }} />), (<InputGroupText> {order.currency} </InputGroupText>))}
-          {/* {this._renderInputItem(null, (<Badge color='light'>{this.props.mode === 'buy' ? this.state.currency : this.state.asset } Avai {avaiBalance}</Badge>), (<Badge color='dark'>OnOrder {onOrderBalance}</Badge>))} */}
         </Col>
       </Row>
     )

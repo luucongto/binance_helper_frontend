@@ -209,31 +209,6 @@ class OpenOrders extends Component {
         <Row>
           {this._renderList()}
         </Row>
-
-        {/* <Row>
-          <Col>
-            <Card>
-              <CardHeader>
-                <i className='fa fa-align-justify' /> Completed Orders
-                <Badge className='ml-3' color='primary'> Done {doneStatus.done}</Badge>
-                <Badge className='ml-3' color='primary'> Auto {doneStatus.auto}</Badge>
-                <Badge className='ml-3' color='secondary'> Manual {doneStatus.manual}</Badge>
-                <Badge className='ml-3' color='success'> TEST {doneStatus.TEST}</Badge>
-                <Badge className='ml-3' color='danger'> REAL {doneStatus.REAL}</Badge>
-                <Badge className='ml-3' color='warning'> Waiting {doneStatus.waiting}</Badge>
-                <Badge className='ml-3' color='success'> Watching {doneStatus.watching}</Badge>
-                <Badge className='ml-3' color='success'> Buy {doneStatus.buy}</Badge>
-                <Badge className='ml-3' color='danger'> Sell {doneStatus.sell}</Badge>
-                <a className=' float-right mb-0 card-header-action btn btn-minimize' onClick={() => this.setState({showDoneOrder: !this.state.showDoneOrder})}><i className={this.state.showDoneOrder ? 'icon-arrow-up' : 'icon-arrow-down'} /></a>
-              </CardHeader>
-              <Collapse isOpen={this.state.showDoneOrder} id='collapseExample'>
-                <CardBody className='pl-0 pr-0'>
-                  {this._renderTable(doneOrders)}
-                </CardBody>
-              </Collapse>
-            </Card>
-          </Col>
-        </Row> */}
       </div>
 
     )

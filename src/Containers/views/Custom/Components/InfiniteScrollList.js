@@ -23,10 +23,7 @@ class InfiniteScrollList extends Component {
     }
   }
   componentWillReceiveProps (props) {
-    if (props.items && Object.values(props.items).length) {
-      console.log('componentWillReceiveProps', props)
-      this._fetchMoreData(true)
-    }
+    this._fetchMoreData(true)
   }
   componentWillUnMount () {
     window.removeEventListener('scroll', this.onScroll, false)

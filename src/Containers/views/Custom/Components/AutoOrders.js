@@ -1,18 +1,19 @@
 
 import React, { Component } from 'react'
-import { Badge, Button, Card, CardBody, CardHeader, Col, Row, Table, Collapse, FormGroup, Input, Label } from 'reactstrap'
 import { connect } from 'react-redux'
-import AutoOrdersActions from '../../../../Redux/AutoOrdersRedux'
-import SocketApi from '../../../../Services/SocketApi'
-import ConfirmButton from './ConfirmButton'
-import Custom from 'binance-api-node'
-import Utils from '../../../../Utils/Utils'
-import api from '../../../../Services/Api'
+import { Badge, Card, CardBody, CardHeader, Col, Collapse, FormGroup, Input, Label, Row } from 'reactstrap'
 import underscore from 'underscore'
+import AutoOrdersActions from '../../../../Redux/AutoOrdersRedux'
+import api from '../../../../Services/Api'
+import SocketApi from '../../../../Services/SocketApi'
+import Utils from '../../../../Utils/Utils'
+import InfiniteScrollList from './InfiniteScrollList'
+import AutoOrderRow from './AutoOrderRow'
 class AutoOrders extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      openingOrder: -1,
       orders: [],
       showOrder: false,
       showTest: false,
@@ -30,13 +31,14 @@ class AutoOrders extends Component {
     })
     this.refresh()
   }
-
-  cancelOrder (orderId) {
-    SocketApi.emit('auto_order', {
-      command: 'cancelOrder',
-      id: orderId
-    })
+  toggle (index) {
+    if (this.state.openingOrder === index) {
+      this.setState({openingOrder: -1})
+    } else {
+      this.setState({openingOrder: index})
+    }
   }
+
   _color (status) {
     switch (status) {
       case 'watching':
@@ -55,68 +57,6 @@ class AutoOrders extends Component {
         return 'light'
     }
   }
-  _renderTable (orders) {
-    return !orders.length ? ('') : (
-      <Table responsive size='sm'>
-        <thead>
-          <tr>
-            <th> id </th>
-            <th> currency </th>
-            <th> asset </th>
-            <th> offset </th>
-            <th> Estimate </th>
-            <th> status </th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            orders.map(element => {
-              return (
-                <tr key={element.id} >
-                  <td>
-                    <Badge color={'primary'}> {element.id} </Badge></td>
-                  <td>
-                    <Badge color={'info'}> {element.currency_num > 10 ? element.currency_num.toFixed(2) : element.currency_num.toFixed(4)} </Badge>
-                    <Badge color={'light'}> {element.currency} </Badge>
-                  </td>
-                  <td>
-                    <Badge color={'info'}> {element.asset_num > 10 ? element.asset_num.toFixed(2) : element.asset_num.toFixed(4)} </Badge>
-                    <Badge color={'dark'}> {element.asset} </Badge>
-                  </td>
-                  <td>
-                    <Badge color={'dark'}> {element.offset} </Badge>
-                    <Badge color={element.offset_percent > 0 ? 'success' : 'danger'}> {element.offset_percent}% </Badge>
-                  </td>
-                  <td>
-                    <Badge color={'light'}> {element.estimate} </Badge>
-                    <Badge color={'dark'}> {element.initial_estimate}</Badge>
-                    <img src={'https://tether.to/wp-content/uploads/2015/02/TetherIcon.png'} width='15' className='fa' />
-                    <Badge color={element.initial_estimate_percent > 0 ? 'success' : 'danger'}> {element.initial_estimate_percent}% </Badge>
-                  </td>
-                  <td>
-                    <Row>
-                      <Col xs='6' lg='auto'>
-                        <Badge color={this._color(element.type)}> {element.type} </Badge>
-                      </Col>
-                      <Col xs='6' lg='auto'>
-                        <Badge color={this._color(element.status)}> {element.status} </Badge>
-                      </Col>
-                      {
-                        element.status === 'watching'
-                      ? (<Col xs='12' lg='4'>
-                        <ConfirmButton color='danger' size='sm' onClick={() => this.cancelOrder(element.id)} > <i className='fa fa-ban' /> </ConfirmButton>
-                      </Col>) : ''
-                      }
-                    </Row>
-                  </td>
-                </tr>
-              )
-            })
-          }
-        </tbody>
-      </Table>
-    )
-  }
 
   _update (props) {
     let orders = Utils.clone(props.autoOrders)
@@ -126,7 +66,7 @@ class AutoOrders extends Component {
         order.estimate = parseFloat(prices[order.currency + 'USDT'] || 1) * currencyNum
         order.estimate = Utils.formatNumber(order.estimate)
         order.initial_estimate = Utils.formatNumber((parseFloat(prices[order.asset + order.currency] || 0) * order.initial_asset_num + order.initial_currency_num) * parseFloat(prices[order.currency + 'USDT'] || 1))
-        order.initial_estimate_percent = Utils.formatNumber(order.estimate / order.initial_estimate * 100)
+        order.initial_estimate_percent = Utils.formatNumber(order.estimate / order.initial_estimate * 100 - 100)
         order.offset_percent = Utils.formatNumber(parseFloat(order.offset) / parseFloat(prices[order.asset + order.currency] || 1) * 100)
       })
       orders = underscore.sortBy(orders, a => -new Date(a.updatedAt).getTime())
@@ -174,12 +114,18 @@ class AutoOrders extends Component {
               </CardHeader>
               <Collapse isOpen={this.state.showOrder}>
                 <CardBody>
-                  {this._renderTable(orders)}
+                  <Row>
+                    <InfiniteScrollList ref='scrollList'
+                      items={orders}
+                      renderItem={(order, index) => <AutoOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => this.toggle(order.id)} />}
+                    />
+                  </Row>
                 </CardBody>
               </Collapse>
             </Card>
           </Col>
         </Row>
+
       </div>
 
     )

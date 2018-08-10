@@ -41,7 +41,7 @@ class ConfirmButton extends Component {
       )
     } else {
       return (
-        <Button className={this.props.className || ''} size={this.props.size || 'sm'} active color={this.props.color || 'success'} onClick={() => this.click()}>
+        <Button className={this.props.className || ''} size={this.props.size || 'sm'} active color={this.props.color || 'success'} onClick={() => this.click()} disabled={this.props.disabled}>
           {this.props.children}
         </Button>
       )
