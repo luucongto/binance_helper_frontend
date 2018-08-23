@@ -29,6 +29,8 @@ class PlaceBotOrder extends Component {
       type: this.types()[0].value,
       offset: 0,
       currency_num: 0,
+      mode: 0,
+      cutloss: 0,
       asset_num: 0
     }
   }
@@ -54,6 +56,8 @@ class PlaceBotOrder extends Component {
       currency_num: this.state.currency_num,
       asset_num: this.state.asset_num,
       type: this.state.type,
+      mode: this.state.mode,
+      cutloss: this.state.cutloss,
       offset: this.state.offset
     })
     Alert.info(`Added Auto Order ${this.state.currency_num}${this.state.currency} / ${this.state.asset_num + this.state.asset} ~ ${this.state.offset}`, {
@@ -97,7 +101,6 @@ class PlaceBotOrder extends Component {
     let assets = this.assets(this.state.currency)
 
     let currencies = this.currencies()
-    let types = this.types()
     let offsetButtons = [1, 2, 3, 5, 10]
     return (
       <Col>
@@ -109,7 +112,7 @@ class PlaceBotOrder extends Component {
           <Collapse isOpen={this.state.show}>
             <CardBody>
               <Row>
-                <Col lg='12' md='12' xl='6'>
+                <Col xl='auto'>
                   {
                   this._renderInputItem(
                     'Balance',
@@ -127,6 +130,21 @@ class PlaceBotOrder extends Component {
                   )
                 }
                   {
+                    this._renderInputItem(
+                      'Asset',
+                      (<Input type='number' id='price' placeholder='0' required value={this.state.asset_num} onChange={(event) => {
+                        this.setState({asset_num: parseFloat(event.target.value)})
+                      }} />),
+                      (<Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({asset: event.target.value})}>
+                        {
+                        assets.map(e => <option key={e} value={e} >{e}</option>)
+                      }
+                      </Input>)
+                    )
+                  }
+                </Col>
+                <Col xl='auto'>
+                  {
                   this._renderInputItem(
                     'Offset',
                     (<Input type='number' id='price' placeholder='0' required value={this.state.offset} onChange={(event) => {
@@ -137,7 +155,6 @@ class PlaceBotOrder extends Component {
                     </InputGroupText>)
                   )
                 }
-
                   <FormGroup row>
                     <Col xl='12'>
                       <InputGroup>
@@ -163,31 +180,56 @@ class PlaceBotOrder extends Component {
                     </Col>
                   </FormGroup>
                 </Col>
-
-                <Col>
+                <Col xl='auto'>
                   {
                   this._renderInputItem(
-                    'Asset',
-                    (<Input type='number' id='price' placeholder='0' required value={this.state.asset_num} onChange={(event) => {
-                      this.setState({asset_num: parseFloat(event.target.value)})
+                    'Cutloss',
+                    (<Input type='number' id='price' placeholder='0' required value={this.state.cutloss} onChange={(event) => {
+                      this.setState({cutloss: event.target.value})
                     }} />),
-                    (<Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({asset: event.target.value})}>
-                      {
-                      assets.map(e => <option key={e} value={e} >{e}</option>)
-                    }
-                    </Input>)
+                    (<InputGroupText>
+                      {this.state.currency}
+                    </InputGroupText>)
                   )
                 }
-                  {
-                  this._renderInputItem(
-                    'REAL API',
-                    (
-                      <AppSwitch className={'ml-1 mr-3 mb-0 mt-1'} label color={'success'} defaultChecked={this.state.type === 'REAL'} size={'sm'} onClick={() => this.setState({type: this.state.type === 'REAL' ? 'TEST' : 'REAL'})} />
-                    ),
-                    null
-                  )
-                }
+                  <FormGroup row>
+                    <Col xl='12'>
+                      <InputGroup>
+                        <Row>
+                          {
+                          offsetButtons.map(offsetButton => (
+                            <Col xs='2' key={offsetButton}>
+                              <LoadingButton
+                                size='sm' color={this.props.mode === 'buy' ? 'success' : 'danger'}
+                                request={() => api.getPrices()}
+                                handle={(prices) => {
+                                  let livePrice = parseFloat(prices[this.state.asset + this.state.currency] || 0)
+                                  this.setState({cutloss: livePrice * offsetButton / 100})
+                                }}
+                              >
+                                {offsetButton}%
+                              </LoadingButton>
+                            </Col>
+                          ))
+                        }
+                        </Row>
+                      </InputGroup>
+                    </Col>
+                  </FormGroup>
                 </Col>
+
+                <Col xl='auto'>
+                  <Button size='sm' className='mr-1 mt-1' color={'success'} onClick={() => this.setState({type: this.state.type === 'REAL' ? 'TEST' : 'REAL'})} >
+                    <i className={this.state.type === 'REAL' ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
+                    REAL
+                  </Button>
+                  <Button size='sm' className='mr-1 mt-1' color={'success'} onClick={() => this.setState({mode: this.state.mode ? 0 : 1})} >
+                    <i className={this.state.mode === 1 ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
+                    Always Watch
+                  </Button>
+
+                </Col>
+
               </Row>
             </CardBody>
             <CardFooter>

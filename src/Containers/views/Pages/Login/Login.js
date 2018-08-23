@@ -3,9 +3,6 @@ import { Button, Card, CardBody, CardGroup, Col, Container, Input, InputGroup, I
 import { connect } from 'react-redux'
 import LoginActions from '../../../../Redux/LoginRedux'
 import { GoogleLogin } from 'react-google-login'
-import runtimeEnv from '@mars/heroku-js-runtime-env'
-import api from '../../../../Services/Api'
-const env = runtimeEnv()
 class Login extends Component {
   constructor (props) {
     super(props)
@@ -26,10 +23,10 @@ class Login extends Component {
       this.props.history.push('/')
     }
   }
-  logout = () => {
+  logout ()  {
     this.setState({isAuthenticated: false, token: '', user: null})
   }
-  googleResponse = (response) => {
+  googleResponse (response) {
     if (response.accessToken) {
       const tokenBlob = new Blob([JSON.stringify({access_token: response.accessToken}, null, 2)], {type: 'application/json'})
       // let params = {
@@ -84,7 +81,7 @@ class Login extends Component {
                       <Col xs='6' lg='6'>
                         <GoogleLogin
                           className='loginBtn loginBtn--google'
-                          clientId={env.REACT_APP_GOOGLE_CLIENT_ID}
+                          clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
                           onSuccess={this.googleResponse}
                           onFailure={this.googleResponse}
                       >
