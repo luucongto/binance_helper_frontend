@@ -185,6 +185,10 @@ const Trade = Loadable({
   loader: () => import ('./views/Custom/Trade'),
   loading: Loading,
 })
+const TradeTable = Loadable({
+    loader: () => import ('./views/Custom/TradeTable'),
+    loading: Loading,
+  })
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -227,7 +231,8 @@ const routes = [
   { path: '/widgets', name: 'Widgets', component: Widgets },
   { path: '/charts', name: 'Charts', component: Charts },
   { path: '/accountInfo', name: 'Account Info', component: AccountInfo},
-  { path: '/trade', name: 'Open Orders', component: Trade}
+  { path: '/trade', name: 'Open Orders', component: Trade},
+  { path: '/trade_table', name: 'Open Orders', component: TradeTable}
 ];
 
 export default routes;

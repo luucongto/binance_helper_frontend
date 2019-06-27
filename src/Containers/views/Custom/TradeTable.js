@@ -6,7 +6,7 @@ import AutoOrders from './Components/AutoOrders'
 import OpenOrders from './Components/OpenOrders'
 import PlaceOrder from './Components/PlaceOrder'
 import PlaceBotOrder from './Components/PlaceBotOrder'
-class Trade extends Component {
+class TradeTable extends Component {
   constructor (props) {
     super(props)
     this.toggle = this.toggle.bind(this)
@@ -69,7 +69,7 @@ class Trade extends Component {
             </TabContent>
           </Col>
         </Row>
-        <OpenOrders />
+        <OpenOrders isTable />
         <AutoOrders />
       </div>
 
@@ -77,4 +77,4 @@ class Trade extends Component {
   }
 }
 
-export default Trade
+export default TradeTable

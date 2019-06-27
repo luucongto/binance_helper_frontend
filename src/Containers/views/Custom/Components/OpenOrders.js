@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Button, Card, CardHeader, Col, Row} from 'reactstrap'
+import {Button, Card, CardHeader, Col, Row, Table, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap'
 import { connect } from 'react-redux'
 import OpenOrdersActions from '../../../../Redux/OpenOrdersRedux'
 import SocketApi from '../../../../Services/SocketApi'
@@ -11,6 +11,8 @@ class OpenOrders extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      large: false,
+      currentOrder: {},
       showAuto: true,
       openingOrder: -1,
       orders: [],
@@ -29,8 +31,13 @@ class OpenOrders extends Component {
       hideSymbols: []
     }
     this._setupSocket()
+    this.toggleLarge = this.toggleLarge.bind(this)
   }
-
+  toggleLarge () {
+    this.setState({
+      large: !this.state.large
+    })
+  }
   refresh () {
     SocketApi.emit('update_order', {
       command: 'refresh'
@@ -142,7 +149,7 @@ class OpenOrders extends Component {
         renderOrders = renderOrders.filter(order => order.asset !== symbol && order.currency !== symbol)
       })
     }
-    renderOrders = underscore.sortBy(renderOrders, order => -new Date(order.updatedAt).getTime())
+    renderOrders = underscore.sortBy(renderOrders, order => order.id)
     return renderOrders
   }
   toggle (index) {
@@ -153,6 +160,34 @@ class OpenOrders extends Component {
     }
   }
   _renderList () {
+    var orders = this.state.orders
+    if (this.props.isTable) {
+      return (
+        <Table responsive>
+          <thead>
+            <tr>
+              <th> id</th>
+              <th> quantity</th>
+              <th> asset</th>
+              <th> currency</th>
+              <th> price</th>
+              <th> offset</th>
+              <th> percent</th>
+              <th> mode</th>
+              <th> type</th>
+              <th> trigger</th>
+              <th> status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map(order => <OpenOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => {
+              this.setState({currentOrder: order})
+              this.toggleLarge()
+            }} isTable />)}
+          </tbody>
+        </Table>
+      )
+    }
     return (
       <InfiniteScrollList ref='scrollList'
         items={this.state.orders || []}
@@ -160,6 +195,7 @@ class OpenOrders extends Component {
         />
     )
   }
+
   _renderHeader (openOrders) {
     let self = this
     let symbols = openOrders.map(order => order.asset).concat(openOrders.map(order => order.currency))
@@ -199,6 +235,7 @@ class OpenOrders extends Component {
     )
   }
   render () {
+    var currentOrder = this.state.currentOrder
     return (
       <div className='animated fadeIn pl-0 pr-0'>
         <Row>
@@ -209,6 +246,14 @@ class OpenOrders extends Component {
         <Row>
           {this._renderList()}
         </Row>
+
+        <Modal isOpen={this.state.large} toggle={this.toggleLarge}
+          className={'modal-lg ' + this.props.className}>
+          <ModalBody>
+            <OpenOrderRow key={currentOrder.id} order={currentOrder} isOpen toggle={() => this.toggle(currentOrder.id)} />
+          </ModalBody>
+
+        </Modal>
       </div>
 
     )

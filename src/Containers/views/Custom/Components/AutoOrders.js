@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Badge, Card, CardBody, CardHeader, Col, Collapse, FormGroup, Input, Label, Row } from 'reactstrap'
+import { Badge, Card, CardBody, CardHeader, Col, Collapse, FormGroup, Input, Label, Row, Table } from 'reactstrap'
 import underscore from 'underscore'
 import AutoOrdersActions from '../../../../Redux/AutoOrdersRedux'
 import api from '../../../../Services/Api'
@@ -80,6 +80,41 @@ class AutoOrders extends Component {
     this._update(props)
   }
 
+  _renderList (orders) {
+    if (this.props.isTable) {
+      return (
+        <Table responsive>
+          <thead>
+            <tr>
+              <th> id</th>
+              <th> quantity</th>
+              <th> asset</th>
+              <th> currency</th>
+              <th> price</th>
+              <th> offset</th>
+              <th> percent</th>
+              <th> mode</th>
+              <th> type</th>
+              <th> trigger</th>
+              <th> status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.orders.map(order => <AutoOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => {
+              this.setState({currentOrder: order})
+              this.toggleLarge()
+            }} isTable />)}
+          </tbody>
+        </Table>
+      )
+    }
+    return (
+      <InfiniteScrollList ref='scrollList'
+        items={orders}
+        renderItem={(order, index) => <AutoOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => this.toggle(order.id)} />}
+        />
+    )
+  }
   render () {
     let orders = this.state.orders
     if (!this.state.showTest) {
@@ -115,10 +150,7 @@ class AutoOrders extends Component {
               <Collapse isOpen={this.state.showOrder}>
                 <CardBody>
                   <Row>
-                    <InfiniteScrollList ref='scrollList'
-                      items={orders}
-                      renderItem={(order, index) => <AutoOrderRow key={order.id} order={order} isOpen={this.state.openingOrder === order.id} toggle={() => this.toggle(order.id)} />}
-                    />
+                    {this._renderList(orders)}
                   </Row>
                 </CardBody>
               </Collapse>

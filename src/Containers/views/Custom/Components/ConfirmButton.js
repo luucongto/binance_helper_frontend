@@ -16,6 +16,9 @@ class ConfirmButton extends Component {
   }
   cancel () {
     this.setState({isConfirming: false})
+    if(this.props.onCancel){
+        this.props.onCancel()
+    }
   }
   click () {
     if (this.state.isConfirming) {

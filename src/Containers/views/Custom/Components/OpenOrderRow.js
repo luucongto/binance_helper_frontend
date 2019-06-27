@@ -12,6 +12,7 @@ class OpenOrderRow extends Component {
     super(props)
     let order = props && props.order ? props.order : {}
     this.state = {
+      isEditing: false,
       quantity: order.quantity || 0,
       type: order.type || 'NA',
       offset: order.offset || 0,
@@ -22,6 +23,7 @@ class OpenOrderRow extends Component {
   }
 
   componentWillReceiveProps (props) {
+    if (this.state.isEditing) return
     let order = props && props.order ? props.order : {}
     this.setState({
       quantity: order.quantity || 0,
@@ -54,6 +56,7 @@ class OpenOrderRow extends Component {
     return status
   }
   updateOrder (orderId) {
+    this.setState({isEditing: false})
     SocketApi.emit('update_order', {
       command: 'updateOrder',
       id: orderId,
@@ -97,28 +100,28 @@ class OpenOrderRow extends Component {
       case 'watching':
         return (
           <CardFooter>
-            <ConfirmButton className='ml-3' size='sm' color={order.mode === 'buy' ? 'success' : 'danger'} onClick={() => this.updateOrder(order.id)} ><i className='fa fa-dot-circle-o' /> {order.mode.toUpperCase()}</ConfirmButton>
+            <ConfirmButton onCancel={() => this.setState({isEditing: false})} className='ml-3' size='sm' color={order.mode === 'buy' ? 'success' : 'danger'} onClick={() => this.updateOrder(order.id)} ><i className='fa fa-dot-circle-o' /> {order.mode.toUpperCase()}</ConfirmButton>
             <Button color='secondary' size='sm' className='ml-3' onClick={() => this.holdOrder(order.id)} active> <i className='fa fa-pause' /> </Button>
           </CardFooter>
         )
       case 'waiting':
         return (
           <CardFooter>
-          <ConfirmButton className='ml-3' size='sm' color={order.mode === 'buy' ? 'success' : 'danger'} onClick={() => this.updateOrder(order.id)} ><i className='fa fa-dot-circle-o' /> {order.mode.toUpperCase()}</ConfirmButton>
-          <Button color='secondary' size='sm' className='ml-3' onClick={() => this.holdOrder(order.id)} active> <i className='fa fa-pause' /> </Button>
-          <Button color='success' size='sm' className='ml-3' onClick={() => this.resumeOrder(order.id)} active> <i className='fa fa-eye' /> </Button>
-          <ConfirmButton color='danger' size='sm' className='ml-3' onClick={() => this.cancelOrder(order.id)} active> <i className='fa fa-stop' /> </ConfirmButton>
-        </CardFooter>)
+            <ConfirmButton onCancel={() => this.setState({isEditing: false})} className='ml-3' size='sm' color={order.mode === 'buy' ? 'success' : 'danger'} onClick={() => this.updateOrder(order.id)} ><i className='fa fa-dot-circle-o' /> {order.mode.toUpperCase()}</ConfirmButton>
+            <Button color='secondary' size='sm' className='ml-3' onClick={() => this.holdOrder(order.id)} active> <i className='fa fa-pause' /> </Button>
+            <Button color='success' size='sm' className='ml-3' onClick={() => this.resumeOrder(order.id)} active> <i className='fa fa-eye' /> </Button>
+            <ConfirmButton onCancel={() => this.setState({isEditing: false})} color='danger' size='sm' className='ml-3' onClick={() => this.cancelOrder(order.id)} active> <i className='fa fa-stop' /> </ConfirmButton>
+          </CardFooter>)
       case 'done':
       case 'cancel':
         return ('')
       default :
         return (
           <CardFooter>
-            <ConfirmButton className='ml-3' size='sm' color={order.mode === 'buy' ? 'success' : 'danger'} onClick={() => this.updateOrder(order.id)} ><i className='fa fa-dot-circle-o' /> {order.mode.toUpperCase()}</ConfirmButton>
+            <ConfirmButton onCancel={() => this.setState({isEditing: false})} className='ml-3' size='sm' color={order.mode === 'buy' ? 'success' : 'danger'} onClick={() => this.updateOrder(order.id)} ><i className='fa fa-dot-circle-o' /> {order.mode.toUpperCase()}</ConfirmButton>
             <Button color='warning' size='sm' className='ml-3' onClick={() => this.waitingOrder(order.id)} active> <i className='fa fa-eye-slash' /> </Button>
             <Button color='success' size='sm' className='ml-3' onClick={() => this.resumeOrder(order.id)} active> <i className='fa fa-eye' /> </Button>
-            <ConfirmButton color='danger' size='sm' className='ml-3' onClick={() => this.cancelOrder(order.id)} active> <i className='fa fa-stop' /> </ConfirmButton>
+            <ConfirmButton onCancel={() => this.setState({isEditing: false})} color='danger' size='sm' className='ml-3' onClick={() => this.cancelOrder(order.id)} active> <i className='fa fa-stop' /> </ConfirmButton>
           </CardFooter>
         )
     }
@@ -176,12 +179,12 @@ class OpenOrderRow extends Component {
           {this._renderInputItem('Quantity', (<Input type='number' id='quantity' placeholder='Enter quantity' required value={this.state.quantity} onChange={(event) => {
             let quantity = parseFloat(event.target.value)
             let total = (quantity * this.state.expect_price) || 0
-            this.setState({quantity, total})
+            this.setState({quantity, total, isEditing: true})
           }} />), (<InputGroupText> {order.asset} </InputGroupText>))}
 
         </Col>
         <Col xs='12' md='4' lg='4' xl='4'>
-          {this._renderInputItem('Offset', (<Input type='number' id='offset' placeholder='0' required value={this.state.offset} onChange={(event) => { this.setState({offset: event.target.value}) }} />), (<InputGroupText> {order.currency} </InputGroupText>))}
+          {this._renderInputItem('Offset', (<Input type='number' id='offset' placeholder='0' required value={this.state.offset} onChange={(event) => { this.setState({offset: event.target.value, isEditing: true}) }} />), (<InputGroupText> {order.currency} </InputGroupText>))}
 
           <FormGroup row>
             <Col xl='12'>
@@ -199,13 +202,13 @@ class OpenOrderRow extends Component {
             let expectPrice = parseFloat(event.target.value)
             expectPrice = expectPrice > 0 ? expectPrice : 0
             let total = this.state.quantity * expectPrice
-            this.setState({expect_price: expectPrice, total})
+            this.setState({expect_price: expectPrice, total, isEditing: true})
           }} />), (<InputGroupText> {order.currency} </InputGroupText>))}
 
           {this._renderInputItem('Price', (<Input type='number' id='price' placeholder='0' required value={this.state.price} onChange={(event) => {
             let price = parseFloat(event.target.value)
             price = price > 0 ? price : 0
-            this.setState({price: price})
+            this.setState({price: price, isEditing: true})
           }} />), (<InputGroupText> {order.currency} </InputGroupText>))}
         </Col>
       </Row>
@@ -219,9 +222,26 @@ class OpenOrderRow extends Component {
     order.total = Utils.formatNumber(total)
     order.expectTotal = Utils.formatNumber(expectTotal)
     order.offset_percent = Utils.formatNumber(order.offset / order.expect_price * 100)
+    if (this.props.isTable) {
+      return (
+        <tr onClick={() => this.props.toggle()}>
+          <td><Badge color={'info'}> {order.id}</Badge></td>
+          <td><Badge color={'info'}> {order.quantity} </Badge></td>
+          <td><Badge color={'light'}> {order.asset} </Badge></td>
+          <td><Badge color={'dark'}> {order.currency} </Badge></td>
+          <td><Badge color={'light'}> {order.price} </Badge></td>
+          <td><Badge color={'info'}> {order.offset} </Badge></td>
+          <td><Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge></td>
+          <td><Badge color={order.mode === 'buy' ? 'success' : 'danger'}> {order.mode} </Badge></td>
+          <td><Badge color={order.type === 'TEST' ? 'success' : 'danger'}> {order.type}</Badge></td>
+          <td><Badge color={order.balance_id > 0 ? 'primary' : 'secondary'}> {order.balance_id > 0 ? `Auto[${order.balance_id}]` : 'Manual'} </Badge></td>
+          <td><Badge className='ml-3' color={this._color(order.status)}> {order.status} </Badge></td>
+        </tr>
+      )
+    }
     return (
-      <Col xs='12' xl='6' className='animated fadeIn' >
-        <Card>
+      <Col xs='12' xl='12' className='animated fadeIn' >
+        <Card className={this.state.editing ? 'border-secondary' : ''}>
           <CardHeader onClick={() => this.props.toggle()}>
 
             <Badge color={'info'}> {order.id}</Badge>

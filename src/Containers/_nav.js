@@ -36,6 +36,11 @@ export default {
       url: '/trade',
       icon: 'icon-basket'
     },
+    {
+        name: 'Trade Table',
+        url: '/trade_table',
+        icon: 'icon-basket'
+      },
     // {
     //   name: 'Trades',
     //   url: '/',
