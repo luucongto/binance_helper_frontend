@@ -7,6 +7,10 @@ import Utils from '../../../../Utils/Utils'
 import ConfirmButton from './ConfirmButton'
 import underscore from 'underscore'
 import SocketApi from '../../../../Services/SocketApi'
+
+var numeral = require('numeral')
+const NUMFORMAT = '0,0[.][000]'
+
 class OpenOrderRow extends Component {
   constructor (props) {
     super(props)
@@ -229,7 +233,7 @@ class OpenOrderRow extends Component {
           <td><Badge color={'info'}> {order.quantity} </Badge></td>
           <td><Badge color={'light'}> {order.asset} </Badge></td>
           <td><Badge color={'dark'}> {order.currency} </Badge></td>
-          <td><Badge color={'light'}> {order.price} </Badge></td>
+          <td><Badge color={'light'}> {numeral(order.price).format(NUMFORMAT)} </Badge></td>
           <td><Badge color={'info'}> {order.offset} </Badge></td>
           <td><Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge></td>
           <td><Badge color={order.mode === 'buy' ? 'success' : 'danger'}> {order.mode} </Badge></td>

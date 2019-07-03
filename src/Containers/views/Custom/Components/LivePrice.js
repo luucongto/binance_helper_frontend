@@ -8,6 +8,10 @@ import LivePriceActions from '../../../../Redux/LivePriceRedux'
 import {PAIRS} from '../../../../Config/Const'
 import Utils from '../../../../Utils/Utils'
 import SocketApi from '../../../../Services/SocketApi'
+
+var numeral = require('numeral')
+const NUMFORMAT = '0,0[.][000]'
+
 class LivePrice extends Component {
   constructor (props) {
     super(props)
@@ -152,7 +156,7 @@ class LivePrice extends Component {
                           <Badge color='danger' onClick={() => this.removePair(pair)}><i className='fa fa-ban' /></Badge>
                           <Badge color='light'>{pair} </Badge>
                           {/* <Badge color='dark'>{this.state.marketPrices[pair].currency} </Badge> */}
-                          <Badge color={this.state.marketPrices[pair].maker ? 'success' : 'danger'}>{this.state.marketPrices[pair].price}</Badge>
+                          <Badge color={this.state.marketPrices[pair].maker ? 'success' : 'danger'}>{numeral(this.state.marketPrices[pair].price).format(NUMFORMAT)}</Badge>
                           
                         </Col>
                       ))
