@@ -58,6 +58,7 @@
     "_heroku-prebuild": "export NPM_CONFIG_PRODUCTION=false; export NODE_ENV=; NPM_CONFIG_PRODUCTION=false NODE_ENV=development yarn install --only=dev --dev",
     "_heroku-postbuild": "export NPM_CONFIG_PRODUCTION=true; export NODE_ENV=production;",
     "start": "react-scripts start",
+"build_no": "react-scripts build",
     "build": "sh -ac '. .env.build; react-scripts build'",
     "deploy": "rsync -rav build root@vps:/root/projects/react-ignite-coreui/",
     "test": "react-scripts test --env=jsdom",
