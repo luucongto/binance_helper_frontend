@@ -23,17 +23,28 @@ class AccountInfo extends Component {
     var available = numeral(this.props.accountInfo[element].available).format(NUMFORMAT)
     var onOrder = numeral(this.props.accountInfo[element].onOrder).format(NUMFORMAT)
     var total = numeral(parseFloat(this.props.accountInfo[element].onOrder) + parseFloat(this.props.accountInfo[element].available)).format(NUMFORMAT)
+    var est = numeral(parseFloat(this.props.accountInfo[element].usdtValue)).format(NUMFORMAT)
     return (
       <tr key={element} >
         <td>{element}</td>
         <td>{available}</td>
         <td>{onOrder}</td>
         <td>{total}</td>
+        <td>{est}</td>
       </tr>
     )
   }
   render () {
     let balances = this.props.accountInfo ? Object.keys(this.props.accountInfo).filter(e => parseFloat(this.props.accountInfo[e].available) + parseFloat(this.props.accountInfo[e].onOrder) > 0) : []
+    let totalUsdt = 0
+    if(this.props.accountInfo) {
+      Object.keys(this.props.accountInfo).forEach(element => {
+        totalUsdt += parseFloat(this.props.accountInfo[element].usdtValue)
+      })
+      const NUMFORMAT = '0,0[.][00]'
+      totalUsdt = numeral(totalUsdt).format(NUMFORMAT)
+    }
+    
     return this.props.fetching ? (<Progress animated color='danger' value='100' />)
       : (
         <div className='animated fadeIn'>
@@ -44,7 +55,7 @@ class AccountInfo extends Component {
             <Col>
               <Card>
                 <CardHeader>
-                  <i className='fa fa-align-justify' /> Combined All Table
+                  <i className='fa fa-align-justify' /> {totalUsdt}
                 </CardHeader>
                 <CardBody>
                   <Table hover bordered striped responsive size='sm'>
@@ -54,6 +65,7 @@ class AccountInfo extends Component {
                         <th>Free</th>
                         <th>Locked</th>
                         <th>Total</th>
+                        <th>EST</th>
                       </tr>
                     </thead>
                     <tbody>
