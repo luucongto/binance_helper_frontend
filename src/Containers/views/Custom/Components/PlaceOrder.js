@@ -117,8 +117,10 @@ class PlaceOrder extends Component {
       if (this.props.mode === 'sell') {
         symbol = this.state.asset
       }
-      avaiBalance = Utils.formatNumber(parseFloat(this.props.accountInfo[symbol].available))
-      onOrderBalance = Utils.formatNumber(parseFloat(this.props.accountInfo[symbol].onOrder))
+      if (this.props.accountInfo[symbol]) {
+        avaiBalance = Utils.formatNumber(parseFloat(this.props.accountInfo[symbol].available))
+        onOrderBalance = Utils.formatNumber(parseFloat(this.props.accountInfo[symbol].onOrder))
+      }
     }
     return (
       <Col>
