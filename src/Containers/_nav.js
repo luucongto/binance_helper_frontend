@@ -37,16 +37,21 @@ export default {
       icon: 'icon-basket'
     },
     {
-        name: 'Trade Table',
-        url: '/trade_table',
-        icon: 'icon-basket'
-      },
+      name: 'Trade Table',
+      url: '/trade_table',
+      icon: 'icon-basket'
+    },
+    {
+      name: 'Trade History',
+      url: '/tradeHistory',
+      icon: 'icon-speedometer'
+    }
     // {
     //   name: 'Trades',
     //   url: '/',
     //   icon: 'icon-basket',
     //   children: [
-        
+
     //     {
     //       name: 'History',
     //       url: '/tradeHistory',

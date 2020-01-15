@@ -111,6 +111,7 @@ class PlaceOrder extends Component {
     let types = this.types()
     let offsetButtons = [1, 2, 3, 5, 10]
     let avaiBalance = 0
+    let maxSellAvai = 0
     let onOrderBalance = 0
     if (this.props.accountInfo) {
       let symbol = this.state.currency
@@ -118,6 +119,7 @@ class PlaceOrder extends Component {
         symbol = this.state.asset
       }
       if (this.props.accountInfo[symbol]) {
+        maxSellAvai = parseFloat(this.props.accountInfo[symbol].available)
         avaiBalance = Utils.formatNumber(parseFloat(this.props.accountInfo[symbol].available))
         onOrderBalance = Utils.formatNumber(parseFloat(this.props.accountInfo[symbol].onOrder))
       }
@@ -137,6 +139,10 @@ class PlaceOrder extends Component {
                   'Quantity',
                   (<Input type='number' id='quantity' placeholder='Enter quantity' required value={this.state.quantity} onChange={(event) => {
                     let quantity = parseFloat(event.target.value)
+                    if (this.props.mode === 'sell') {
+                      quantity = Math.min(quantity, maxSellAvai)
+                    }
+
                     let total = (quantity * this.state.expect_price) || 0
                     this.setState({quantity, total})
                   }}

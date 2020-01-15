@@ -22,6 +22,7 @@ class API {
     this.accountInfo = this.accountInfo.bind(this)
     this.openOrders = this.openOrders.bind(this)
     this.apiSetting = this.apiSetting.bind(this)
+    this.tradeHistory = this.tradeHistory.bind(this)
   }
 
   authenticated (loginToken) {
@@ -89,6 +90,11 @@ class API {
       let result = data.data
       return result && result.success ? result.data : null
     })
+  }
+  async tradeHistory (params) {
+    let data = await this.api.post('binance/tradeHistory', params)
+    let result = data.data
+    return result && result.success ? result : null
   }
 }
 // const API = (loginToken, baseURL = ApiConfig.baseURL) => {

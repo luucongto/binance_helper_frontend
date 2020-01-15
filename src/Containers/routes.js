@@ -1,195 +1,198 @@
-import React from 'react';
+import React from 'react'
 import Loadable from 'react-loadable'
 
-import DefaultLayout from './containers/DefaultLayout/DefaultLayout';
+import DefaultLayout from './containers/DefaultLayout/DefaultLayout'
 
-function Loading() {
-  return <div>Loading...</div>;
+function Loading () {
+  return <div>Loading...</div>
 }
 
 const Breadcrumbs = Loadable({
   loader: () => import('./views/Base/Breadcrumbs'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Cards = Loadable({
   loader: () => import('./views/Base/Cards'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Carousels = Loadable({
   loader: () => import('./views/Base/Carousels'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Collapses = Loadable({
   loader: () => import('./views/Base/Collapses'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Dropdowns = Loadable({
   loader: () => import('./views/Base/Dropdowns'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Forms = Loadable({
   loader: () => import('./views/Base/Forms'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Jumbotrons = Loadable({
   loader: () => import('./views/Base/Jumbotrons'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const ListGroups = Loadable({
   loader: () => import('./views/Base/ListGroups'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Navbars = Loadable({
   loader: () => import('./views/Base/Navbars'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Navs = Loadable({
   loader: () => import('./views/Base/Navs'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Paginations = Loadable({
   loader: () => import('./views/Base/Paginations'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Popovers = Loadable({
   loader: () => import('./views/Base/Popovers'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const ProgressBar = Loadable({
   loader: () => import('./views/Base/ProgressBar'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Switches = Loadable({
   loader: () => import('./views/Base/Switches'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Tables = Loadable({
   loader: () => import('./views/Base/Tables'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Tabs = Loadable({
   loader: () => import('./views/Base/Tabs'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Tooltips = Loadable({
   loader: () => import('./views/Base/Tooltips'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const BrandButtons = Loadable({
   loader: () => import('./views/Buttons/BrandButtons'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const ButtonDropdowns = Loadable({
   loader: () => import('./views/Buttons/ButtonDropdowns'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const ButtonGroups = Loadable({
   loader: () => import('./views/Buttons/ButtonGroups'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Buttons = Loadable({
   loader: () => import('./views/Buttons/Buttons'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Charts = Loadable({
   loader: () => import('./views/Charts'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Dashboard = Loadable({
   loader: () => import('./views/Dashboard'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const CoreUIIcons = Loadable({
   loader: () => import('./views/Icons/CoreUIIcons'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Flags = Loadable({
   loader: () => import('./views/Icons/Flags'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const FontAwesome = Loadable({
   loader: () => import('./views/Icons/FontAwesome'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const SimpleLineIcons = Loadable({
   loader: () => import('./views/Icons/SimpleLineIcons'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Alerts = Loadable({
   loader: () => import('./views/Notifications/Alerts'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Badges = Loadable({
   loader: () => import('./views/Notifications/Badges'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Modals = Loadable({
   loader: () => import('./views/Notifications/Modals'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Colors = Loadable({
   loader: () => import('./views/Theme/Colors'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Typography = Loadable({
   loader: () => import('./views/Theme/Typography'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
 const Widgets = Loadable({
   loader: () => import('./views/Widgets/Widgets'),
-  loading: Loading,
-});
+  loading: Loading
+})
 
-//Custom
+// Custom
 const AccountInfo = Loadable({
-  loader: () => import ('./views/Custom/AccountInfo'),
-  loading: Loading,
+  loader: () => import('./views/Custom/AccountInfo'),
+  loading: Loading
 })
 const OpenOrders = Loadable({
-  loader: () => import ('./views/Custom/Components/OpenOrders'),
-  loading: Loading,
+  loader: () => import('./views/Custom/Components/OpenOrders'),
+  loading: Loading
 })
 const Trade = Loadable({
-  loader: () => import ('./views/Custom/Trade'),
-  loading: Loading,
+  loader: () => import('./views/Custom/Trade'),
+  loading: Loading
 })
 const TradeTable = Loadable({
-    loader: () => import ('./views/Custom/TradeTable'),
-    loading: Loading,
-  })
-
+  loader: () => import('./views/Custom/TradeTable'),
+  loading: Loading
+})
+const TradeHistory = Loadable({
+  loader: () => import('./views/Custom/TradeHistory'),
+  loading: Loading
+})
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -230,9 +233,10 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', component: Modals },
   { path: '/widgets', name: 'Widgets', component: Widgets },
   { path: '/charts', name: 'Charts', component: Charts },
-  { path: '/accountInfo', name: 'Account Info', component: AccountInfo},
-  { path: '/trade', name: 'Open Orders', component: Trade},
-  { path: '/trade_table', name: 'Open Orders', component: TradeTable}
-];
+  { path: '/accountInfo', name: 'Account Info', component: AccountInfo },
+  { path: '/trade', name: 'Open Orders', component: Trade },
+  { path: '/trade_table', name: 'Open Orders', component: TradeTable },
+  { path: '/tradeHistory', name: 'Account Info', component: TradeHistory }
+]
 
-export default routes;
+export default routes

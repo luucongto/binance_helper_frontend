@@ -10,6 +10,7 @@ export default () => {
   /* ------------- Assemble The Reducers ------------- */
   const appReducer = combineReducers({
     login: require('./LoginRedux').reducer,
+    tradeHistory: require('./TradeHistoryRedux').reducer,
     accountInfo: require('./AccountInfoRedux').reducer,
     openOrders: require('./OpenOrdersRedux').reducer,
     autoOrders: require('./AutoOrdersRedux').reducer,
