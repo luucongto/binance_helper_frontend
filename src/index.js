@@ -6,7 +6,8 @@ import { render } from 'react-snapshot'
 import registerServiceWorker from './registerServiceWorker'
 import DevConfig from './Config/DevConfig'
 import App from './App'
-require('dotenv').load();
+import 'react-select-search/style.css'
+require('dotenv').load()
 
 console.log('process.env' && process.env)
 /**

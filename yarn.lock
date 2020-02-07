@@ -3456,6 +3456,11 @@ functional-red-black-tree@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
 
+fuse.js@^3.2.0:
+  version "3.4.6"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-3.4.6.tgz#545c3411fed88bf2e27c457cab6e73e7af697a45"
+  integrity sha512-H6aJY4UpLFwxj1+5nAvufom5b2BT2v45P1MkPvdGIK8fWjQx/7o6tTT1+ALV0yawQvbmvCF0ufl2et8eJ7v7Cg==
+
 gauge@~2.7.3:
   version "2.7.4"
   resolved "https://registry.yarnpkg.com/gauge/-/gauge-2.7.4.tgz#2c03405c7538c39d7eb37b317022e325fb018bf7"
@@ -6654,6 +6659,11 @@ react-loadable@5.4.0:
   dependencies:
     prop-types "^15.5.0"
 
+react-onclickoutside@^6.7.1:
+  version "6.9.0"
+  resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.9.0.tgz#a54bc317ae8cf6131a5d78acea55a11067f37a1f"
+  integrity sha512-8ltIY3bC7oGhj2nPAvWOGi+xGFybPNhJM0V1H8hY/whNcXgmDeaeoCMPPd8VatrpTsUWjb/vGzrmu6SrXVty3A==
+
 react-perfect-scrollbar@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-perfect-scrollbar/-/react-perfect-scrollbar-1.1.1.tgz#60f2aa9ab61ecb45ef890070fc3b3a657f2491a9"
@@ -6778,6 +6788,14 @@ react-scripts@1.1.4:
     whatwg-fetch "2.0.3"
   optionalDependencies:
     fsevents "^1.1.3"
+
+react-select-search@^0.10.2:
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/react-select-search/-/react-select-search-0.10.2.tgz#6c331b4cdf9b73db8a3ef109ae26acb0ff216f8c"
+  integrity sha512-jreRyx2XlenHmdie76t+0efFmoXRgfjk3uG9SzuAzgxOCnlr8FD7T++qSbh8TrApS8OeC+j7Cn1OUR1DpuuEvQ==
+  dependencies:
+    fuse.js "^3.2.0"
+    react-onclickoutside "^6.7.1"
 
 react-side-effect@^1.1.0:
   version "1.1.5"

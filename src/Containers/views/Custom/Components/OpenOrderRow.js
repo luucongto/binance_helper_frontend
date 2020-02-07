@@ -7,7 +7,7 @@ import Utils from '../../../../Utils/Utils'
 import ConfirmButton from './ConfirmButton'
 import underscore from 'underscore'
 import SocketApi from '../../../../Services/SocketApi'
-
+import cryptoNames from '../crypto.json'
 var numeral = require('numeral')
 const NUMFORMAT = '0,0[.][000]'
 
@@ -250,8 +250,8 @@ class OpenOrderRow extends Component {
 
             <Badge color={'info'}> {order.id}</Badge>
             <Badge color={'info'}> {Utils.formatNumber(order.quantity)} </Badge>
-            <Badge color={'light'}> {order.asset} </Badge>
-            <Badge color={'dark'}> {order.currency} </Badge>
+            <Badge color={'light'}><img src={cryptoNames[order.asset]} style={{ height: 15, marginRight: 5}} alt='' />  {order.asset} </Badge>
+            <Badge color={'dark'}> <img src={cryptoNames[order.currency]} style={{ height: 15,marginRight: 5}} alt='' /> {order.currency} </Badge>
             <Badge color={'light'}> {Utils.formatNumber(order.price)} </Badge>
             <Badge color={'info'}> {Utils.formatNumber(order.offset)} </Badge>
             <Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge>

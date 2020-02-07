@@ -20,6 +20,7 @@ import {PAIRS} from '../../../../Config/Const'
 import SocketApi from '../../../../Services/SocketApi'
 import Utils from '../../../../Utils/Utils'
 import Alert from 'react-s-alert'
+import cryptoNames from '../crypto.json'
 class PlaceOrder extends Component {
   constructor (props) {
     super(props)
@@ -227,7 +228,7 @@ class PlaceOrder extends Component {
                     {this.state.currency}
                   </InputGroupText>)
                 )}
-                  {this._renderInputItem(null, (<Badge color='light'>{this.props.mode === 'buy' ? this.state.currency : this.state.asset } Avai {avaiBalance}</Badge>), (<Badge color='dark'>OnOrder {onOrderBalance}</Badge>))}
+                  {this._renderInputItem(null, (<Badge color='light'><img src={cryptoNames[this.props.mode === 'buy' ? this.state.currency : this.state.asset ]} style={{width: 15, marginRight: 5}} alt='' /> {this.props.mode === 'buy' ? this.state.currency : this.state.asset } Avai {avaiBalance}</Badge>), (<Badge color='dark'>OnOrder {onOrderBalance}</Badge>))}
                 </Col>
               </Row>
             </CardBody>

@@ -8,7 +8,8 @@ import LivePriceActions from '../../../../Redux/LivePriceRedux'
 import {PAIRS} from '../../../../Config/Const'
 import Utils from '../../../../Utils/Utils'
 import SocketApi from '../../../../Services/SocketApi'
-
+import SelectSearch from 'react-select-search'
+import cryptoNames from '../crypto.json'
 var numeral = require('numeral')
 const NUMFORMAT = '0,0[.][000]'
 
@@ -20,20 +21,28 @@ class LivePrice extends Component {
       },
       pairs: [],
       currency: 'USDT',
-      asset: this.assets('USDT')[0]
+      asset: this.assets('USDT')[0].value
     }
     this.binance = new Custom()
     this.assets = this.assets.bind(this)
   }
   assets (currency) {
-    return PAIRS[currency].assets
+    return PAIRS[currency].assets.map(asset => {
+      const img = <div><img src={cryptoNames[asset]} style={{width: 15, marginRight: 5}} alt='' />{asset}</div>
+      const name = asset
+      const value = asset
+      return {name, value, img}
+    })
+  }
+
+  renderSearchItem (option) {
+    return option.img
   }
   currencies () {
-    return Object.values(PAIRS)
+    return Object.values(PAIRS).map(each => { return {name: each.label, value: each.value, img: <div><img src={cryptoNames[each.value]} style={{width: 15, marginRight: 5}} alt='' />{each.value}</div>} })
   }
-  componentDidMount(){
-    if(this.props.livePricePairs)
-    this._setupWatchingEnpoint(this.props.livePricePairs)
+  componentDidMount () {
+    if (this.props.livePricePairs) { this._setupWatchingEnpoint(this.props.livePricePairs) }
   }
   addPair () {
     let pair = this.state.asset + this.state.currency
@@ -43,8 +52,8 @@ class LivePrice extends Component {
     this.props.update(underscore.uniq(currentPairs))
   }
   removePair (pair) {
-    let pairs =  Object.keys(this.state.marketPrices)
-    pairs = pairs.filter(e => e!= pair)
+    let pairs = Object.keys(this.state.marketPrices)
+    pairs = pairs.filter(e => e !== pair)
     console.log(pair, pairs)
     this.props.update(pairs)
   }
@@ -72,7 +81,7 @@ class LivePrice extends Component {
   watch (trades) {
     let marketPrices = this.state.marketPrices
     trades.price = parseFloat(trades.price)
-    if(marketPrices[trades.symbol]) marketPrices[trades.symbol] = trades
+    if (marketPrices[trades.symbol]) marketPrices[trades.symbol] = trades
     this.setState({marketPrices: marketPrices})
   }
 
@@ -88,6 +97,7 @@ class LivePrice extends Component {
   render () {
     let pairs = Object.keys(this.state.marketPrices)
     let assets = this.assets(this.state.currency)
+    console.log('{this.state.asset}', this.state.asset)
     let currencies = this.currencies()
     return this.props.fetching ? (<Progress animated color='danger' value='100' />)
       : (
@@ -97,56 +107,40 @@ class LivePrice extends Component {
               <Card>
                 <CardHeader >
                   Live Prices
-                  <Badge className="ml-3" color='primary'> {SocketApi.serverTime} </Badge>
-                  <Badge className="ml-1" color={SocketApi.connectionStatus === 'connect' ? 'success' : 'danger'}> 
-                    <i className='fa fa-wifi'/>
+                  <Badge className='ml-3' color='primary'> {SocketApi.serverTime} </Badge>
+                  <Badge className='ml-1' color={SocketApi.connectionStatus === 'connect' ? 'success' : 'danger'}>
+                    <i className='fa fa-wifi' />
                   </Badge>
-                  <Badge className="ml-1" color={SocketApi.serverRealApi ? 'success' : 'danger'}> 
+                  <Badge className='ml-1' color={SocketApi.serverRealApi ? 'success' : 'danger'}>
                     {SocketApi.serverRealApi ? 'REAL' : 'TEST'}
                   </Badge>
-                  </CardHeader>
+                </CardHeader>
                 <CardBody>
                   <Row>
                     <Col className='ml-3'>
-                      <FormGroup row>
-                          <InputGroup>
-                            <InputGroupAddon addonType='prepend'>
-                              <InputGroupText>
-                            Asset
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({asset: event.target.value})}>
-                              {
+                          Asset
+                      <SelectSearch options={assets} value={this.state.asset} name='asset' placeholder='Choose asset' onChange={(event) => this.setState({asset: event.value})}
+                        renderOption={this.renderSearchItem} />
+
+                      {/* <Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({asset: event.target.value})}>
+                            {
                                 assets.map(e => <option key={e} value={e} >{e}</option>)
                               }
-                            </Input>
-                          </InputGroup>
-                      </FormGroup>
+                          </Input> */}
                     </Col>
                     <Col className='ml-3'>
-                    <FormGroup row>
-                      
-                        <InputGroup>
-                          <InputGroupAddon addonType='prepend'>
-                            <InputGroupText>
+                      <Col className='ml-3'>
                       Currency
-                            </InputGroupText>
-                          </InputGroupAddon>
-                          <Input type='select' name='currency' id='currency' onChange={(event) => this.setState({currency: event.target.value})}>
-                            {
-                              currencies.map(e => <option key={e.value} value={e.value} >{e.label}</option>)
-                            }
-                          </Input>
-                        </InputGroup>
-                      
-                    </FormGroup>
+                          <SelectSearch options={currencies} value={this.state.currency} name='asset' placeholder='Choose asset' onChange={(event) => this.setState({currency: event.value})}
+                            renderOption={this.renderSearchItem} />
+                      </Col>
                     </Col>
                     <Col className='ml-3'>
-                    <FormGroup row>
+                      <FormGroup row>
                         <InputGroup>
                           <Button size='l' color='success' onClick={() => this.addPair()} > Add </Button>
                         </InputGroup>
-                    </FormGroup>
+                      </FormGroup>
                     </Col>
                   </Row>
                   <Row>
@@ -157,7 +151,7 @@ class LivePrice extends Component {
                           <Badge color='light'>{pair} </Badge>
                           {/* <Badge color='dark'>{this.state.marketPrices[pair].currency} </Badge> */}
                           <Badge color={this.state.marketPrices[pair].maker ? 'success' : 'danger'}>{numeral(this.state.marketPrices[pair].price).format(NUMFORMAT)}</Badge>
-                          
+
                         </Col>
                       ))
                     }

@@ -1,17 +1,45 @@
 import React, { Component } from 'react'
-import { Card, CardBody, CardHeader, Col, Row, Table, Progress, Input } from 'reactstrap'
+import { Card, CardBody, CardHeader, Col, Row, Table, Progress, Input, Button } from 'reactstrap'
 import { connect } from 'react-redux'
 import TradeHistoryActions from '../../../Redux/TradeHistoryRedux'
 import AccountInfoActions from '../../../Redux/AccountInfoRedux'
-import ApiKeySetting from './Components/ApiKeySetting'
 import Alert from 'react-s-alert'
+import Const from '../../../Config/Const'
+import SelectSearch from 'react-select-search'
+
+import cryptoNames from './crypto.json'
 var numeral = require('numeral')
+
+const CPAIRS = Const.PAIRS
+const PAIRS = {}
+Object.values(CPAIRS).forEach(each => {
+  let currency = each.value
+  each.assets.forEach(asset => {
+    const assetImg = <img src={cryptoNames[asset]} style={{width: 15, marginRight: 5}} alt='' />
+    const currencyImg = <img src={cryptoNames[currency]} style={{width: 15, marginRight: 5}} alt='' />
+    const img = (
+      <div>
+        {assetImg}
+        {asset}
+        {' => '}
+        {currencyImg}
+        {currency}
+      </div>
+    )
+    const photo = assetImg
+    const name = `${asset}-${currency}`
+    const value = `${asset}${currency}`
+    PAIRS[value] = {name, value, img, photo}
+  })
+})
 class TradeHistory extends Component {
   constructor (props) {
     super(props)
     this.state = {
       page: 0,
       asset: '',
+      buy: true,
+      sell: true,
       data: []
     }
     this.props.accountInfoRequest()
@@ -29,12 +57,16 @@ class TradeHistory extends Component {
       })
     }
     if (this.props.tradeHistory !== props.tradeHistory) {
-      let data = [].concat(this.state.data).concat(props.tradeHistory)
+      let data = []
+      if (this.state.page > 0) {
+        data = data.concat(this.state.data)
+      }
+      data = data.concat(props.tradeHistory)
       this.setState({data})
       if (props.tradeHistory.length === 500) {
         let page = this.state.page + 1
         this.setState({page})
-        this.props.request({symbol: this.state.asset + 'USDT', fromId: page * 500})
+        this.props.request({symbol: this.state.asset, fromId: page * 500})
       }
     }
   }
@@ -42,10 +74,15 @@ class TradeHistory extends Component {
     const NUMFORMAT = '0,0[.][0000]'
     return numeral(num).format(NUMFORMAT)
   }
+  renderSearchItem (option) {
+    return option.img
+  }
   renderItem (item) {
     return (
       <tr key={item.id} class={item.isBuyer ? 'table-success' : 'table-danger'}>
-        <td>{item.symbol}</td>
+        <td>
+          {PAIRS[item.symbol].img}
+        </td>
         {/* <td>{item.orderId}</td> */}
         <td>{this.formatNumber(item.price)}</td>
         <td>{this.formatNumber(item.qty)}</td>
@@ -58,6 +95,23 @@ class TradeHistory extends Component {
   }
 
   render () {
+    let data = [].concat(this.state.data)
+    if (!this.state.buy) {
+      data = data.filter(each => !each.isBuyer)
+    }
+    if (!this.state.sell) {
+      data = data.filter(each => each.isBuyer)
+    }
+    const userAssets = []
+    if (this.props.accountInfo) {
+      Object.keys(this.props.accountInfo).forEach(each => {
+        const pair = each + 'USDT'
+        if (PAIRS[pair]) {
+          userAssets.push(PAIRS[pair])
+        }
+      })
+    }
+    const pairs = Object.values(PAIRS)
     return this.props.fetching ? (<Progress animated color='danger' value='100' />)
       : (
         <div className='animated fadeIn'>
@@ -65,17 +119,59 @@ class TradeHistory extends Component {
             <Col>
               <Card>
                 <CardHeader >
-                  <Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => {
+                  <Row>
+                    <Col xs='auto'>
+                    Assets
+                      <SelectSearch options={pairs} value={this.state.asset} name='language' placeholder='Choose asset' onChange={(event) => {
+                        console.log('onChange', event)
+                        const asset = event.value
+                        this.setState({asset, page: 0}, () => {
+                          this.props.request({symbol: asset})
+                        })
+                      }}
+                        renderOption={this.renderSearchItem} />
+                    </Col>
+                    <Col xs='auto'>
+                      Your Assets
+                      <SelectSearch options={userAssets} value={this.state.asset} name='language' placeholder='Choose your asset' onChange={(event) => {
+                        const asset = event.value
+                        this.setState({asset, page: 0}, () => {
+                          this.props.request({symbol: asset})
+                        })
+                      }} renderOption={this.renderSearchItem} />
+                      {/* <Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => {
                     const asset = event.target.value
                     console.log('onChange', event.target.value)
                     this.setState({asset, page: 0}, () => {
-                      this.props.request({symbol: asset + 'USDT'})
+                      this.props.request({symbol: asset})
                     })
                   }}>
                     {
-                        Object.keys(this.props.accountInfo).map(e => <option key={e} value={e} >{e}</option>)
+                        PAIRS.map(e => <option key={e} value={e} >{e}</option>)
                       }
-                  </Input>
+                  </Input> */}
+                    </Col>
+                    <Col>
+                      <Button size='sm'
+                        className='mr-1 mt-1'
+                        color={'success'}
+                        onClick={() => {
+                          this.setState({buy: !this.state.buy})
+                        }} >
+                        <i className={this.state.buy ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
+                    Buy
+                  </Button>
+                      <Button size='sm'
+                        className='mr-1 mt-1'
+                        color={'danger'}
+                        onClick={() => {
+                          this.setState({sell: !this.state.sell})
+                        }} >
+                        <i className={this.state.sell ? 'mr-1 fa fa-check-square-o' : 'mr-1 fa fa-square-o'} />
+                    Sell
+                  </Button>
+                    </Col>
+                  </Row>
                 </CardHeader>
                 <CardBody>
                   <Table hover bordered striped responsive size='sm'>
@@ -93,7 +189,7 @@ class TradeHistory extends Component {
                     </thead>
                     <tbody>
                       {
-                        this.state.data.map(element => this.renderItem(element))
+                        data.map(element => this.renderItem(element))
                       }
                     </tbody>
                   </Table>
