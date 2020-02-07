@@ -29,7 +29,7 @@ Object.values(CPAIRS).forEach(each => {
     const photo = assetImg
     const name = `${asset}-${currency}`
     const value = `${asset}${currency}`
-    PAIRS[value] = {name, value, img, photo}
+    PAIRS[value] = {name, value, img, photo, assetImg, currencyImg}
   })
 })
 class TradeHistory extends Component {
@@ -80,13 +80,13 @@ class TradeHistory extends Component {
   renderItem (item) {
     return (
       <tr key={item.id} class={item.isBuyer ? 'table-success' : 'table-danger'}>
-        <td>
+        {/* <td>
           {PAIRS[item.symbol].img}
-        </td>
-        {/* <td>{item.orderId}</td> */}
-        <td>{this.formatNumber(item.price)}</td>
-        <td>{this.formatNumber(item.qty)}</td>
-        <td>{this.formatNumber(item.quoteQty)}</td>
+        </td> */}
+        <td>{item.orderId}</td>
+        <td>{PAIRS[item.symbol].currencyImg}{this.formatNumber(item.price)}</td>
+        <td>{PAIRS[item.symbol].assetImg}{this.formatNumber(item.qty)}</td>
+        <td>{PAIRS[item.symbol].currencyImg}{this.formatNumber(item.quoteQty)}</td>
         {/* <td>{this.formatNumber(item.commission)}</td> */}
         {/* <td>{item.commissionAsset}</td> */}
         <td>{item.time}</td>
@@ -177,8 +177,8 @@ class TradeHistory extends Component {
                   <Table hover bordered striped responsive size='sm'>
                     <thead>
                       <tr>
-                        <th>symbol</th>
-                        {/* <th>orderId</th> */}
+                        {/* <th>symbol</th> */}
+                        <th>orderId</th>
                         <th>price</th>
                         <th>qty</th>
                         <th>quoteQty</th>

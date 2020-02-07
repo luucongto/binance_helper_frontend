@@ -168,14 +168,9 @@ class OpenOrders extends Component {
             <tr>
               <th> id</th>
               <th> quantity</th>
-              <th> asset</th>
-              <th> currency</th>
               <th> price</th>
               <th> offset</th>
-              <th> percent</th>
               <th> mode</th>
-              <th> type</th>
-              <th> trigger</th>
               <th> status</th>
             </tr>
           </thead>

@@ -230,15 +230,21 @@ class OpenOrderRow extends Component {
       return (
         <tr onClick={() => this.props.toggle()}>
           <td><Badge color={'info'}> {order.id}</Badge></td>
-          <td><Badge color={'info'}> {order.quantity} </Badge></td>
-          <td><Badge color={'light'}> {order.asset} </Badge></td>
-          <td><Badge color={'dark'}> {order.currency} </Badge></td>
-          <td><Badge color={'light'}> {numeral(order.price).format(NUMFORMAT)} </Badge></td>
-          <td><Badge color={'info'}> {order.offset} </Badge></td>
-          <td><Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge></td>
-          <td><Badge color={order.mode === 'buy' ? 'success' : 'danger'}> {order.mode} </Badge></td>
-          <td><Badge color={order.type === 'TEST' ? 'success' : 'danger'}> {order.type}</Badge></td>
-          <td><Badge color={order.balance_id > 0 ? 'primary' : 'secondary'}> {order.balance_id > 0 ? `Auto[${order.balance_id}]` : 'Manual'} </Badge></td>
+          <td> <img src={cryptoNames[order.asset]} style={{ height: 15, marginRight: 5 }} alt='' /> <Badge color={'info'}> {order.asset} {order.quantity} </Badge></td>
+          <td>
+            <img src={cryptoNames[order.currency]} style={{ height: 15, marginRight: 5 }} alt='' />
+            <Badge color={'light'}> {order.currency} {numeral(order.price).format(NUMFORMAT)} </Badge>
+          </td>
+          <td>
+            <img src={cryptoNames[order.currency]} style={{ height: 15, marginRight: 5 }} alt='' />
+            <Badge color={'info'} className='mr-2'> {order.currency} {order.offset} </Badge>
+            <Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge>
+          </td>
+          <td>
+            <Badge color={order.type === 'TEST' ? 'success' : 'danger'} className='mr-2'> {order.type} </Badge>
+            <Badge color={order.mode === 'buy' ? 'success' : 'danger'} className='mr-2'> {order.mode} </Badge>
+            <Badge color={order.balance_id > 0 ? 'primary' : 'secondary'}> {order.balance_id > 0 ? `Auto[${order.balance_id}]` : 'Manual'} </Badge>
+          </td>
           <td><Badge className='ml-3' color={this._color(order.status)}> {order.status} </Badge></td>
         </tr>
       )
@@ -250,8 +256,8 @@ class OpenOrderRow extends Component {
 
             <Badge color={'info'}> {order.id}</Badge>
             <Badge color={'info'}> {Utils.formatNumber(order.quantity)} </Badge>
-            <Badge color={'light'}><img src={cryptoNames[order.asset]} style={{ height: 15, marginRight: 5}} alt='' />  {order.asset} </Badge>
-            <Badge color={'dark'}> <img src={cryptoNames[order.currency]} style={{ height: 15,marginRight: 5}} alt='' /> {order.currency} </Badge>
+            <Badge color={'light'}><img src={cryptoNames[order.asset]} style={{ height: 15, marginRight: 5 }} alt='' /> {order.asset} </Badge>
+            <Badge color={'dark'}> <img src={cryptoNames[order.currency]} style={{ height: 15, marginRight: 5 }} alt='' /> {order.currency} </Badge>
             <Badge color={'light'}> {Utils.formatNumber(order.price)} </Badge>
             <Badge color={'info'}> {Utils.formatNumber(order.offset)} </Badge>
             <Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge>
