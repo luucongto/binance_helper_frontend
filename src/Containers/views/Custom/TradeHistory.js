@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Card, CardBody, CardHeader, Col, Row, Table, Progress, Input, Button } from 'reactstrap'
+import { Card, CardBody, CardHeader, Col, Row, Table, Progress, Badge, Button } from 'reactstrap'
 import { connect } from 'react-redux'
 import TradeHistoryActions from '../../../Redux/TradeHistoryRedux'
 import AccountInfoActions from '../../../Redux/AccountInfoRedux'
@@ -52,8 +52,10 @@ class TradeHistory extends Component {
       })
     }
     if (this.props.accountInfo !== props.accountInfo) {
+      const asset = Object.keys(props.accountInfo)[0] + 'USDT'
+      this.setState({ asset })
       this.props.request({
-        symbol: Object.keys(props.accountInfo)[0] + 'USDT'
+        symbol: asset
       })
     }
     if (this.props.tradeHistory !== props.tradeHistory) {
@@ -74,6 +76,10 @@ class TradeHistory extends Component {
     const NUMFORMAT = '0,0[.][0000]'
     return numeral(num).format(NUMFORMAT)
   }
+  formatPercent (num) {
+    const NUMFORMAT = '0,0[.][00]'
+    return numeral(num).format(NUMFORMAT)
+  }
   renderSearchItem (option) {
     return option.img
   }
@@ -84,7 +90,12 @@ class TradeHistory extends Component {
           {PAIRS[item.symbol].img}
         </td> */}
         <td>{item.orderId}</td>
-        <td>{PAIRS[item.symbol].currencyImg}{this.formatNumber(item.price)}</td>
+        <td>
+          {PAIRS[item.symbol].currencyImg}{this.formatNumber(item.price)}
+        </td>
+        <td>
+          <Badge>{this.formatPercent(item.price / item.avgMarketPrice * 100)}%</Badge>
+        </td>
         <td>{PAIRS[item.symbol].assetImg}{this.formatNumber(item.qty)}</td>
         <td>{PAIRS[item.symbol].currencyImg}{this.formatNumber(item.quoteQty)}</td>
         {/* <td>{this.formatNumber(item.commission)}</td> */}
@@ -93,7 +104,19 @@ class TradeHistory extends Component {
       </tr>
     )
   }
-
+  renderPrice () {
+    const item = this.state.data && this.state.data.length > 0 ? this.state.data[0] : null
+    if (!item) return ('')
+    console.log(item)
+    return (
+      <Col>
+        {PAIRS[item.symbol].assetImg} 1
+        <span className='ml-2 mr-2'>=</span>
+        {PAIRS[item.symbol].currencyImg}
+        {item ? this.formatNumber(item.avgMarketPrice) : '...'}
+      </Col>
+    )
+  }
   render () {
     let data = [].concat(this.state.data)
     if (!this.state.buy) {
@@ -151,7 +174,7 @@ class TradeHistory extends Component {
                       }
                   </Input> */}
                     </Col>
-                    <Col>
+                    <Col xs='auto'>
                       <Button size='sm'
                         className='mr-1 mt-1'
                         color={'success'}
@@ -171,6 +194,9 @@ class TradeHistory extends Component {
                     Sell
                   </Button>
                     </Col>
+                    <Col xs='auto'>
+                      {this.renderPrice()}
+                    </Col>
                   </Row>
                 </CardHeader>
                 <CardBody>
@@ -180,6 +206,7 @@ class TradeHistory extends Component {
                         {/* <th>symbol</th> */}
                         <th>orderId</th>
                         <th>price</th>
+                        <th>vs market price</th>
                         <th>qty</th>
                         <th>quoteQty</th>
                         {/* <th>commission</th>
