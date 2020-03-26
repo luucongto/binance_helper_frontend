@@ -42,6 +42,7 @@ class TradeHistory extends Component {
       sell: true,
       data: []
     }
+    this.balance = {}
     this.props.accountInfoRequest()
   }
   componentWillReceiveProps (props) {
@@ -108,12 +109,21 @@ class TradeHistory extends Component {
     const item = this.state.data && this.state.data.length > 0 ? this.state.data[0] : null
     if (!item) return ('')
     console.log(item)
+    let tradeResult = 0
+    this.state.data.forEach(eachItem => {
+      tradeResult = tradeResult + (eachItem.isBuyer ? -1 : 1) * parseFloat(eachItem.quoteQty)
+    })
+    let accountInfo = this.props.accountInfo[item.symbol.replace('USDT', '')]
+    let currentBalance = accountInfo ? accountInfo.usdtValue : 0
     return (
       <Col>
         {PAIRS[item.symbol].assetImg} 1
         <span className='ml-2 mr-2'>=</span>
         {PAIRS[item.symbol].currencyImg}
         {item ? this.formatNumber(item.avgMarketPrice) : '...'}
+        <span className='ml-2 mr-2' />Trading result: {PAIRS[item.symbol].currencyImg}{this.formatNumber(tradeResult)}
+        <span className='ml-2 mr-2' />Balance {currentBalance}
+        <span className='ml-2 mr-2' />EST {this.formatNumber(currentBalance + tradeResult)}
       </Col>
     )
   }
@@ -134,6 +144,7 @@ class TradeHistory extends Component {
         }
       })
     }
+
     const pairs = Object.values(PAIRS)
     return this.props.fetching ? (<Progress animated color='danger' value='100' />)
       : (

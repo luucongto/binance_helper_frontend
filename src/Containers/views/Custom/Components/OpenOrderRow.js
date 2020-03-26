@@ -237,7 +237,8 @@ class OpenOrderRow extends Component {
           </td>
           <td>
             <img src={cryptoNames[order.currency]} style={{ height: 15, marginRight: 5 }} alt='' />
-            <Badge color={'info'} className='mr-2'> {order.currency} {order.offset} </Badge>
+            <Badge color={'info'} className='mr-2' style={{minWidth: 80}}> {order.currency} {order.offset} </Badge>
+            <Badge color={'info'} className='mr-2' style={{minWidth: 50}}>{Utils.formatNumber(order.offset_percent)}% </Badge>
             <Badge color={(order.mode === 'buy' && order.percent <= 0) || (order.mode === 'sell' && order.percent >= 0) ? 'success' : 'danger'}> {order.percent}% </Badge>
           </td>
           <td>

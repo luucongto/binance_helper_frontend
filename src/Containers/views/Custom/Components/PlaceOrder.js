@@ -140,9 +140,9 @@ class PlaceOrder extends Component {
                   'Quantity',
                   (<Input type='number' id='quantity' placeholder='Enter quantity' required value={this.state.quantity} onChange={(event) => {
                     let quantity = parseFloat(event.target.value)
-                    if (this.props.mode === 'sell') {
-                      quantity = Math.min(quantity, maxSellAvai)
-                    }
+                    // if (this.props.mode === 'sell') {
+                    //   quantity = quantity
+                    // }
 
                     let total = (quantity * this.state.expect_price) || 0
                     this.setState({quantity, total})

@@ -23,7 +23,7 @@ class Login extends Component {
       this.props.history.push('/')
     }
   }
-  logout ()  {
+  logout () {
     this.setState({isAuthenticated: false, token: '', user: null})
   }
   googleResponse (response) {
@@ -37,6 +37,8 @@ class Login extends Component {
         type: 'google',
         tokenBlob: tokenBlob
       })
+    } else {
+      console.log('Error', response)
     }
   }
   _login () {
