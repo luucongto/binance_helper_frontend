@@ -17,7 +17,7 @@ class SocketApi {
     this.socket = io(ApiConfig.baseURL, {query: `auth_token=${loginToken}`})
     this.socket.on('server_setting', data => {
       this.serverTime = data.time
-      this.serverRealApi = data.type
+      this.serverRealApi = data.type === 'true'
     })
     this.socket.on('connect', () => {
       self.connectionStatus = 'connect'
