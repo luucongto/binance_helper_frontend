@@ -10,8 +10,6 @@ import Utils from '../../../../Utils/Utils'
 import SocketApi from '../../../../Services/SocketApi'
 import SelectSearch from 'react-select-search'
 import cryptoNames from '../crypto.json'
-import LivePriceWatching from './LivePriceWatching'
-import _ from 'underscore'
 var numeral = require('numeral')
 const NUMFORMAT = '0,0[.][0000000]'
 
@@ -29,7 +27,7 @@ class LivePrice extends Component {
     this.assets = this.assets.bind(this)
   }
   assets(currency) {
-    return _.sortBy(PAIRS[currency].assets, asset => asset).map(asset => {
+    return PAIRS[currency].assets.map(asset => {
       const img = <div><img src={cryptoNames[asset]} style={{ width: 15, marginRight: 5 }} alt='' />{asset}</div>
       const name = asset
       const value = asset
@@ -43,10 +41,41 @@ class LivePrice extends Component {
   currencies() {
     return Object.values(PAIRS).map(each => { return { name: each.label, value: each.value, img: <div><img src={cryptoNames[each.value]} style={{ width: 15, marginRight: 5 }} alt='' />{each.value}</div> } })
   }
+  componentDidMount() {
+    this.props.setRef(this)
+    if (this.props.livePricePairs) { this._setupWatchingEnpoint(this.props.livePricePairs) }
+  }
+  addPair(pair) {
+    let currentPairs = Object.keys(this.state.marketPrices)
+    currentPairs.push(pair)
+    console.log(pair, this.state.marketPrices, currentPairs)
+    this.props.update(underscore.uniq(currentPairs))
+  }
+  removePair(pair) {
+    let pairs = Object.keys(this.state.marketPrices)
+    pairs = pairs.filter(e => e !== pair)
+    console.log(pair, pairs)
+    this.props.update(pairs)
+  }
+  _setupWatchingEnpoint(pairs) {
+    console.log('Setup Socket.... ', pairs)
 
-  addPair() {
-    let pair = this.state.asset + this.state.currency
-    this.watchRef.addPair(pair)
+    let self = this
+    let marketPrices = {}
+    let needUpdate = false
+    pairs.forEach(pair => {
+      if (!this.state.marketPrices[pair]) {
+        marketPrices[pair] = { maker: true, price: '...' }
+        needUpdate = true
+      } else {
+        marketPrices[pair] = this.state.marketPrices[pair]
+      }
+    })
+    this.setState({ marketPrices })
+    if (!needUpdate) return
+    this.binance.ws.trades(pairs, (trades) => {
+      self.watch(trades)
+    })
   }
 
   watch(trades) {
@@ -63,58 +92,27 @@ class LivePrice extends Component {
     pairs = pairs.concat(savedPairs)
     if (pairs.length <= 0) return
     pairs = underscore.uniq(pairs)
+    this._setupWatchingEnpoint(pairs)
   }
   render() {
+    let pairs = Object.keys(this.state.marketPrices)
     let assets = this.assets(this.state.currency)
-    let currencies = this.currencies()
+    console.log('{this.state.asset}', this.state.asset)
     return this.props.fetching ? (<Progress animated color='danger' value='100' />)
       : (
         <div className='animated fadeIn'>
           <Row>
-            <Col>
-              <Card>
-                <CardHeader >
-                  Live Prices
-                  <Badge className='ml-3' color='primary'> {SocketApi.serverTime} </Badge>
-                  <Badge className='ml-1' color={SocketApi.connectionStatus === 'connect' ? 'success' : 'danger'}>
-                    <i className='fa fa-wifi' />
-                  </Badge>
-                  <Badge className='ml-1' color={SocketApi.serverRealApi ? 'success' : 'danger'}>
-                    {SocketApi.serverRealApi ? 'REAL' : 'TEST'}
-                  </Badge>
-                </CardHeader>
-                <CardBody>
-                  <Row>
-                    <Col className='ml-3'>
-                      Asset
-                      <SelectSearch options={assets} value={this.state.asset} name='asset' placeholder='Choose asset' onChange={(event) => this.setState({ asset: event.value })}
-                        renderOption={this.renderSearchItem} />
+            {
+              pairs.map(pair => (
+                <Col xs='12' lg='4' xl='4' md='6' key={pair}>
+                  <Badge color='danger' onClick={() => this.removePair(pair)}><i className='fa fa-ban' /></Badge>
+                  <Badge color='light'>{pair} </Badge>
+                  {/* <Badge color='dark'>{this.state.marketPrices[pair].currency} </Badge> */}
+                  <Badge color={this.state.marketPrices[pair].maker ? 'success' : 'danger'}>{numeral(this.state.marketPrices[pair].price).format(NUMFORMAT)}</Badge>
 
-                      {/* <Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({asset: event.target.value})}>
-                            {
-                                assets.map(e => <option key={e} value={e} >{e}</option>)
-                              }
-                          </Input> */}
-                    </Col>
-                    <Col className='ml-3'>
-                      <Col className='ml-3'>
-                        Currency
-                          <SelectSearch options={currencies} value={this.state.currency} name='asset' placeholder='Choose asset' onChange={(event) => this.setState({ currency: event.value })}
-                          renderOption={this.renderSearchItem} />
-                      </Col>
-                    </Col>
-                    <Col className='ml-3'>
-                      <FormGroup row>
-                        <InputGroup>
-                          <Button size='l' color='success' onClick={() => this.addPair()} > Add </Button>
-                        </InputGroup>
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <LivePriceWatching setRef={ref => this.watchRef = ref} />
-                </CardBody>
-              </Card>
-            </Col>
+                </Col>
+              ))
+            }
           </Row>
         </div>
 

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { Button, Card, CardBody, CardHeader, Col, Row,
+import {
+  Button, Card, CardBody, CardHeader, Col, Row,
   CardFooter,
   FormGroup,
   Input,
@@ -12,17 +13,18 @@ import { Button, Card, CardBody, CardHeader, Col, Row,
   Collapse
 } from 'reactstrap'
 import ConfirmButton from './ConfirmButton'
-import {AppSwitch} from '@coreui/react'
+import { AppSwitch } from '@coreui/react'
 import { connect } from 'react-redux'
 import OpenOrdersActions from '../../../../Redux/OpenOrdersRedux'
 import AccountInfoActions from '../../../../Redux/AccountInfoRedux'
-import {PAIRS} from '../../../../Config/Const'
+import { PAIRS } from '../../../../Config/Const'
 import SocketApi from '../../../../Services/SocketApi'
 import Utils from '../../../../Utils/Utils'
 import Alert from 'react-s-alert'
 import cryptoNames from '../crypto.json'
+import _ from 'underscore'
 class PlaceOrder extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.assets = this.assets.bind(this)
     this.currencies = this.currencies.bind(this)
@@ -38,18 +40,24 @@ class PlaceOrder extends Component {
     }
     this.props.requestAccount()
   }
-  types () {
-    return [{value: 'TEST', label: 'TEST'},
-    {value: 'REAL', label: 'REAL'}]
+  types() {
+    return [{ value: 'TEST', label: 'TEST' },
+    { value: 'REAL', label: 'REAL' }]
   }
-  assets (currency) {
-    return PAIRS[currency].assets
+  assets(currency) {
+    let availableAssets = PAIRS[currency].assets
+    console.log(this.props.accountInfo)
+    if (this.props.mode === 'sell') {
+      availableAssets = availableAssets.filter(each => this.props.accountInfo && this.props.accountInfo[each] && this.props.accountInfo[each].available > 0
+      )
+    }
+    return _.sortBy(availableAssets, asset => asset)
   }
 
-  currencies () {
-    return Object.values(PAIRS)
+  currencies() {
+    return Object.values(PAIRS).sort()
   }
-  placeOrder () {
+  placeOrder() {
     console.log(this.state)
     if (this.state.asset === this.state.currency) return
     if (this.state.expect_price <= 0 || this.state.quantity <= 0) return
@@ -71,7 +79,7 @@ class PlaceOrder extends Component {
       effect: 'bouncyflip'
     })
   }
-  resetOrder () {
+  resetOrder() {
     this.setState({
       quantity: 0,
       asset: this.assets('USDT')[0],
@@ -82,7 +90,7 @@ class PlaceOrder extends Component {
     })
   }
 
-  _renderInputItem (prependText, middle, append) {
+  _renderInputItem(prependText, middle, append) {
     return (
       <FormGroup row>
         <Col xl='12'>
@@ -95,7 +103,7 @@ class PlaceOrder extends Component {
               </InputGroupAddon>) : ('')
             }
             {middle}
-            { append
+            {append
               ? (<InputGroupAddon addonType='append'>
                 {append}
               </InputGroupAddon>) : ('')
@@ -105,7 +113,7 @@ class PlaceOrder extends Component {
       </FormGroup>
     )
   }
-  render () {
+  render() {
     let assets = this.assets(this.state.currency)
 
     let currencies = this.currencies()
@@ -128,7 +136,7 @@ class PlaceOrder extends Component {
     return (
       <Col>
         <Card>
-          <CardHeader onClick={() => this.setState({show: !this.state.show})}>
+          <CardHeader onClick={() => this.setState({ show: !this.state.show })}>
             <i className='fa fa-align-justify' /> {this.props.mode.toUpperCase()}
             <a className=' float-right mb-0 card-header-action btn btn-minimize'><i className={this.state.show ? 'icon-arrow-up' : 'icon-arrow-down'} /></a>
           </CardHeader>
@@ -137,43 +145,43 @@ class PlaceOrder extends Component {
               <Row>
                 <Col lg='12' md='12' xl='6'>
                   {this._renderInputItem(
-                  'Quantity',
-                  (<Input type='number' id='quantity' placeholder='Enter quantity' required value={this.state.quantity} onChange={(event) => {
-                    let quantity = parseFloat(event.target.value)
-                    // if (this.props.mode === 'sell') {
-                    //   quantity = quantity
-                    // }
+                    'Quantity',
+                    (<Input type='number' id='quantity' placeholder='Enter quantity' required value={this.state.quantity} onChange={(event) => {
+                      let quantity = parseFloat(event.target.value)
+                      // if (this.props.mode === 'sell') {
+                      //   quantity = quantity
+                      // }
 
-                    let total = (quantity * this.state.expect_price) || 0
-                    this.setState({quantity, total})
-                  }}
-                  />),
-                  (<Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({asset: event.target.value})}>
-                    {
+                      let total = (quantity * this.state.expect_price) || 0
+                      this.setState({ quantity, total })
+                    }}
+                    />),
+                    (<Input type='select' name='asset' id='asset' value={this.state.asset} onChange={(event) => this.setState({ asset: event.target.value })}>
+                      {
                         assets.map(e => <option key={e} value={e} >{e}</option>)
                       }
-                  </Input>)
-                )}
+                    </Input>)
+                  )}
 
                   {this._renderInputItem(
-                  'Offset',
-                  (<Input type='number' id='price' placeholder='0' required value={this.state.offset} onChange={(event) => {
-                    this.setState({offset: event.target.value})
-                  }} />),
-                  (<InputGroupText>
-                    {this.state.currency}
-                  </InputGroupText>)
-                )}
+                    'Offset',
+                    (<Input type='number' id='price' placeholder='0' required value={this.state.offset} onChange={(event) => {
+                      this.setState({ offset: event.target.value })
+                    }} />),
+                    (<InputGroupText>
+                      {this.state.currency}
+                    </InputGroupText>)
+                  )}
 
                   <FormGroup row>
                     <Col xl='12'>
                       <InputGroup>
                         <Row>
                           {
-                          offsetButtons.map(offsetButton => (
-                            <Col xs='2' key={offsetButton}><Button size='sm' color={this.props.mode === 'buy' ? 'success' : 'danger'} active onClick={() => this.setState({offset: this.state.expect_price * offsetButton / 100})}> {offsetButton}% </Button></Col>
-                          ))
-                        }
+                            offsetButtons.map(offsetButton => (
+                              <Col xs='2' key={offsetButton}><Button size='sm' color={this.props.mode === 'buy' ? 'success' : 'danger'} active onClick={() => this.setState({ offset: this.state.expect_price * offsetButton / 100 })}> {offsetButton}% </Button></Col>
+                            ))
+                          }
                         </Row>
                       </InputGroup>
                     </Col>
@@ -182,53 +190,53 @@ class PlaceOrder extends Component {
 
                 <Col>
                   {
-                  this._renderInputItem(
-                    'REAL API',
-                    (
-                      <AppSwitch className={'ml-1 mr-3 mb-0 mt-1'} label color={'success'} defaultChecked={this.state.type === 'REAL'} size={'sm'} onClick={() => this.setState({type: this.state.type === 'REAL' ? 'TEST' : 'REAL'})} />
-                    ),
-                    null
-                  )
-                }
+                    this._renderInputItem(
+                      'REAL API',
+                      (
+                        <AppSwitch className={'ml-1 mr-3 mb-0 mt-1'} label color={'success'} defaultChecked={this.state.type === 'REAL'} size={'sm'} onClick={() => this.setState({ type: this.state.type === 'REAL' ? 'TEST' : 'REAL' })} />
+                      ),
+                      null
+                    )
+                  }
 
                   {this._renderInputItem(
-                  'Expect',
-                  (<Input type='number' id='price' placeholder='0' required value={this.state.expect_price} onChange={(event) => {
-                    let expectPrice = parseFloat(event.target.value)
-                    expectPrice = expectPrice > 0 ? expectPrice : 0
-                    let total = this.state.quantity * expectPrice
-                    this.setState({expect_price: expectPrice, total})
-                  }} />),
-                  (<Input type='select' name='currency' id='currency' onChange={(event) => {
-                    this.setState({currency: event.target.value, asset: this.assets(event.target.value)[0]})
-                  }}>
-                    {
-                      currencies.map(e => <option key={e.value} value={e.value} >{e.label}</option>)
-                    }
-                  </Input>)
-                )}
-
-                  {this._renderInputItem(
-                  'Total',
-                  (<Input type='number' id='name' placeholder='Enter total' required value={this.state.total} onChange={(event) => {
-                    try {
-                      let total = parseFloat(event.target.value)
-                      if (this.state.expect_price > 0) {
-                        let quantity = total / this.state.expect_price
-                        this.setState({total, quantity})
-                      } else {
-                        let price = total / this.state.quantity
-                        this.setState({total, price})
+                    'Expect',
+                    (<Input type='number' id='price' placeholder='0' required value={this.state.expect_price} onChange={(event) => {
+                      let expectPrice = parseFloat(event.target.value)
+                      expectPrice = expectPrice > 0 ? expectPrice : 0
+                      let total = this.state.quantity * expectPrice
+                      this.setState({ expect_price: expectPrice, total })
+                    }} />),
+                    (<Input type='select' name='currency' id='currency' onChange={(event) => {
+                      this.setState({ currency: event.target.value, asset: this.assets(event.target.value)[0] })
+                    }}>
+                      {
+                        currencies.map(e => <option key={e.value} value={e.value} >{e.label}</option>)
                       }
-                    } catch (e) {
-                      console.log(e, event)
-                    }
-                  }} />),
-                  (<InputGroupText>
-                    {this.state.currency}
-                  </InputGroupText>)
-                )}
-                  {this._renderInputItem(null, (<Badge color='light'><img src={cryptoNames[this.props.mode === 'buy' ? this.state.currency : this.state.asset ]} style={{width: 15, marginRight: 5}} alt='' /> {this.props.mode === 'buy' ? this.state.currency : this.state.asset } Avai {avaiBalance}</Badge>), (<Badge color='dark'>OnOrder {onOrderBalance}</Badge>))}
+                    </Input>)
+                  )}
+
+                  {this._renderInputItem(
+                    'Total',
+                    (<Input type='number' id='name' placeholder='Enter total' required value={this.state.total} onChange={(event) => {
+                      try {
+                        let total = parseFloat(event.target.value)
+                        if (this.state.expect_price > 0) {
+                          let quantity = total / this.state.expect_price
+                          this.setState({ total, quantity })
+                        } else {
+                          let price = total / this.state.quantity
+                          this.setState({ total, price })
+                        }
+                      } catch (e) {
+                        console.log(e, event)
+                      }
+                    }} />),
+                    (<InputGroupText>
+                      {this.state.currency}
+                    </InputGroupText>)
+                  )}
+                  {this._renderInputItem(null, (<Badge color='light'><img src={cryptoNames[this.props.mode === 'buy' ? this.state.currency : this.state.asset]} style={{ width: 15, marginRight: 5 }} alt='' /> {this.props.mode === 'buy' ? this.state.currency : this.state.asset} Avai {avaiBalance}</Badge>), (<Badge color='dark'>OnOrder {onOrderBalance}</Badge>))}
                 </Col>
               </Row>
             </CardBody>

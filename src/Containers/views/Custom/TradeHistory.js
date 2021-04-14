@@ -59,14 +59,17 @@ class TradeHistory extends Component {
         symbol: asset
       })
     }
-    if (this.props.tradeHistory !== props.tradeHistory) {
+    if (this.props.tradeHistory !== props.tradeHistory ) {
       let data = []
       if (this.state.page > 0) {
         data = data.concat(this.state.data)
       }
-      data = data.concat(props.tradeHistory)
+      if(props.tradeHistory){
+        data = data.concat(props.tradeHistory)
+      }
+      
       this.setState({data})
-      if (props.tradeHistory.length === 500) {
+      if (props.tradeHistory && props.tradeHistory.length === 500) {
         let page = this.state.page + 1
         this.setState({page})
         this.props.request({symbol: this.state.asset, fromId: page * 500})

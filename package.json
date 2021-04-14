@@ -58,7 +58,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build_no": "react-scripts build",
-    "build": "sh -ac '. .env.build; react-scripts build'",
+    "build": "sh -ac '. ./.env.build; react-scripts build'",
     "deploy": "rsync -rav build root@vps:/root/projects/react-ignite-coreui/",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
